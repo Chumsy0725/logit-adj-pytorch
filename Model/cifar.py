@@ -9,7 +9,7 @@ import torchvision.transforms as transforms
 device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 
 # Hyper-parameters
-num_epochs = 5
+num_epochs = 3
 learning_rate = 0.001
 
 # Image preprocessing modules
@@ -106,7 +106,7 @@ class ResNet(nn.Module):
         out = self.fc(out)
         return out
 
-model = ResNet(ResidualBlock, [2, 2, 2]).to(device)
+model = ResNet(ResidualBlock, [5,5,5]).to(device)
 
 
 # Loss and optimizer
