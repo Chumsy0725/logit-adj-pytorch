@@ -112,10 +112,31 @@ class ResNet(pl.LightningModule):
 
         train_loader = torch.utils.data.DataLoader(dataset=train_dataset,
                                            batch_size=100, 
-                                           shuffle=True,
-                                           num_workers = 8)
+                                           shuffle=True)
         return train_loader
+    
+    def validation_step(self, batch, batch_idx):
+        images, labels = batch
+        
+        # Forward pass
+        outputs = self(images)
+        loss = F.cross_entropy(outputs, labels)
+        tensorboard_logs = {'val_loss': loss}
+        # use key 'log'
+        return {"Val_loss": loss, 'log': tensorboard_logs}
 
-trainer = Trainer(gpus =1, max_epochs=1, fast_dev_run = False)
+    def val_dataloader(self):
+        # CIFAR-10 dataset
+        test_dataset = torchvision.datasets.CIFAR10(root='../../data/',
+                                            train=False, 
+                                            transform=transforms.ToTensor())
+
+        test_loader = torch.utils.data.DataLoader(dataset=test_dataset,
+                                          batch_size=100, 
+                                          shuffle=False)
+
+        return test_loader
+
+trainer = Trainer(gpus =1, max_epochs=2, fast_dev_run = False)
 model = ResNet(ResidualBlock, [5,5,5])
 trainer.fit(model)
