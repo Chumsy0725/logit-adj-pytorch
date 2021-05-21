@@ -80,3 +80,7 @@ class ResNet(nn.Module):
 
 def Resnet32():
     return ResNet(BasicBlock, [5, 5, 5])
+
+device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
+model = Resnet32().to(device)
+summary(model, (3,32,32))
