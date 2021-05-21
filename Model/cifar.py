@@ -43,9 +43,7 @@ classes = ('plane', 'car', 'bird', 'cat',
            'deer', 'dog', 'frog', 'horse', 'ship', 'truck')
 
 
-model = Resnet32()
-model = model.to(device)
-
+model = Resnet32().to(device)
 
 # Loss and optimizer
 criterion = nn.CrossEntropyLoss()
