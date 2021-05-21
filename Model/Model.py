@@ -10,14 +10,6 @@ def _weights_init(m):
     if isinstance(m, nn.Linear) or isinstance(m, nn.Conv2d):
         init.kaiming_normal_(m.weight)
 
-class LambdaLayer(nn.Module):
-    def __init__(self, lambd):
-        super(LambdaLayer, self).__init__()
-        self.lambd = lambd
-
-    def forward(self, x):
-        return self.lambd(x)
-
 class BasicBlock(nn.Module):
     expansion = 1
 
@@ -30,10 +22,7 @@ class BasicBlock(nn.Module):
 
         self.shortcut = nn.Sequential()
         if stride != 1 or in_planes != planes:
-            self.shortcut = nn.Sequential(
-                     nn.Conv2d(in_planes, self.expansion * planes, kernel_size=1, stride=stride, bias=False),
-                     #nn.BatchNorm2d(self.expansion * planes)
-                )
+            self.shortcut = nn.Sequential(nn.Conv2d(in_planes, self.expansion * planes, kernel_size=1, stride=stride))
 
     def forward(self, x):
         out = F.relu(self.bn1(self.conv1(x)))
@@ -79,8 +68,6 @@ class ResNet(nn.Module):
 
 
 def Resnet32():
-    return ResNet(BasicBlock, [5, 5, 5])
+    """Returns the Resnet32 Architecture for given number of classes."""
 
-device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
-model = Resnet32().to(device)
-summary(model, (3,32,32))
+    return ResNet(BasicBlock, [5, 5, 5])
