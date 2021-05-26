@@ -2,7 +2,7 @@
 Code for converting CIFAR Long Tail Datasets from tfrecord format to npz format.
 Example usage:
     $ python -m tfr2npz --src=/path/to/name.tfrecord --dest=/path/to/dest/folder
-Note that train and test datasets require separate dest folders for above command and they should exist prior to invoking the command.
+Note that dest folder should exist prior to invoking the command.
 """
 
 from absl import app
@@ -57,11 +57,9 @@ def _get_dataset_name_from_src(src: str):
 
 
 def _save_npz_to_dest(dest: str, dataset_name: str, data, labels):
-    file_path_data = os.path.join(dest, dataset_name + "_data.npz")
-    file_path_labels = os.path.join(dest, dataset_name + "_labels.npz")
+    file_path = os.path.join(dest, dataset_name + ".npz")
 
-    np.savez_compressed(file_path_data, data)
-    np.savez_compressed(file_path_labels, labels)
+    np.savez_compressed(file_path, data, labels)
 
 
 def main(_):

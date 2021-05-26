@@ -7,16 +7,12 @@ import torch
 class _CIFARLTNPZDataset(TensorDataset):
 
     FILE_POSTFIX_DATA = "data"
-    FILE_POSTFIX_LABELS = "labels"
 
     def __init__(self, cifar_prefix: str, root: str, train: bool, transform=None):
         self._m_transform = transform
 
-        file_path_data: str = os.path.join(root, cifar_prefix + "_" + ("train" if train else "test") + "_" + _CIFARLTNPZDataset.FILE_POSTFIX_DATA + ".npz")
-        file_path_labels: str = os.path.join(root, cifar_prefix + "_" + ("train" if train else "test") + "_" + _CIFARLTNPZDataset.FILE_POSTFIX_LABELS + ".npz")
-
-        np_data = _CIFARLTNPZDataset._get_np_data_from_file(file_path_data)
-        np_labels = _CIFARLTNPZDataset._get_np_data_from_file(file_path_labels)
+        file_path: str = os.path.join(root, cifar_prefix + "_" + ("train" if train else "test") + ".npz")
+        np_data, np_labels = _CIFARLTNPZDataset._get_np_data_from_file(file_path)
 
         tensor_data = torch.Tensor(np_data).to(dtype=torch.float32)
         tensor_labels = torch.Tensor(np_labels).to(dtype=torch.int64)
@@ -26,7 +22,7 @@ class _CIFARLTNPZDataset(TensorDataset):
     @staticmethod
     def _get_np_data_from_file(file_path: str):
         loaded_file_data = np.load(file_path, allow_pickle=True)
-        return loaded_file_data["arr_0"]
+        return loaded_file_data["arr_0"], loaded_file_data["arr_1"]
 
     def __getitem__(self, idx):
         image, label = super().__getitem__(idx)
