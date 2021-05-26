@@ -1,22 +1,21 @@
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
-import torchvision
 import torchvision.transforms as transforms
 import pytorch_lightning as pl
 from pytorch_lightning import Trainer
+from dataset import CIFAR10LTNPZDataset
 
 classes = ('plane', 'car', 'bird', 'cat',
            'deer', 'dog', 'frog', 'horse', 'ship', 'truck')
 
 transform = transforms.Compose([
-    transforms.ToTensor(),
     transforms.Normalize(mean=[0.485, 0.456, 0.406],
                          std=[0.229, 0.224, 0.225])
 ])
 
 # Hyper-parameters
-num_epochs = 1
+num_epochs = 11
 learning_rate = 0.001
 
 
@@ -106,10 +105,9 @@ class ResNet(pl.LightningModule):
 
     def train_dataloader(self):
         # CIFAR-10 dataset
-        train_dataset = torchvision.datasets.CIFAR10(root='../../data/',
-                                                     train=True,
-                                                     transform=transform,
-                                                     download=True)
+        train_dataset = CIFAR10LTNPZDataset(root='data/train',
+                                            train=True,
+                                            transform=transform)
 
         train_loader = torch.utils.data.DataLoader(dataset=train_dataset,
                                                    batch_size=100,
@@ -128,9 +126,8 @@ class ResNet(pl.LightningModule):
 
     def val_dataloader(self):
         # CIFAR-10 dataset
-        test_dataset = torchvision.datasets.CIFAR10(root='../../data/',
-                                                    train=False,
-                                                    transform=transforms.ToTensor())
+        test_dataset = CIFAR10LTNPZDataset(root='data/test',
+                                           train=False)
 
         test_loader = torch.utils.data.DataLoader(dataset=test_dataset,
                                                   batch_size=100,
