@@ -6,8 +6,6 @@ import torch
 
 class _CIFARLTNPZDataset(TensorDataset):
 
-    FILE_POSTFIX_DATA = "data"
-
     def __init__(self, cifar_prefix: str, root: str, train: bool, transform=None):
         self._m_transform = transform
 
