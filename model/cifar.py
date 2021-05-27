@@ -18,11 +18,11 @@ transform = transforms.Compose([
 ])
 
 # CIFAR-10 dataset
-train_dataset = CIFAR10LTNPZDataset(root='data/train',
+train_dataset = CIFAR10LTNPZDataset(root='data',
                                     train=True,
                                     transform=transform)
 
-test_dataset = CIFAR10LTNPZDataset(root='data/test',
+test_dataset = CIFAR10LTNPZDataset(root='data',
                                    train=False)
 
 # Data loader

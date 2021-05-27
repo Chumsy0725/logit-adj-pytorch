@@ -105,7 +105,7 @@ class ResNet(pl.LightningModule):
 
     def train_dataloader(self):
         # CIFAR-10 dataset
-        train_dataset = CIFAR10LTNPZDataset(root='data/train',
+        train_dataset = CIFAR10LTNPZDataset(root='data',
                                             train=True,
                                             transform=transform)
 
@@ -126,7 +126,7 @@ class ResNet(pl.LightningModule):
 
     def val_dataloader(self):
         # CIFAR-10 dataset
-        test_dataset = CIFAR10LTNPZDataset(root='data/test',
+        test_dataset = CIFAR10LTNPZDataset(root='data',
                                            train=False)
 
         test_loader = torch.utils.data.DataLoader(dataset=test_dataset,
