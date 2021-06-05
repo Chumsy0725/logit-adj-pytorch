@@ -1,30 +1,29 @@
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
-import torchvision
 import torchvision.transforms as transforms
 import pytorch_lightning as pl
 from pytorch_lightning import Trainer
-
-
+from dataset import CIFAR10LTNPZDataset
 
 classes = ('plane', 'car', 'bird', 'cat',
            'deer', 'dog', 'frog', 'horse', 'ship', 'truck')
 
 transform = transforms.Compose([
-    transforms.ToTensor(),
     transforms.Normalize(mean=[0.485, 0.456, 0.406],
                          std=[0.229, 0.224, 0.225])
-                         ])
+])
 
 # Hyper-parameters
-num_epochs = 1
+num_epochs = 11
 learning_rate = 0.001
+
 
 # 3x3 convolution
 def conv3x3(in_channels, out_channels, stride=1):
-    return nn.Conv2d(in_channels, out_channels, kernel_size=3, 
+    return nn.Conv2d(in_channels, out_channels, kernel_size=3,
                      stride=stride, padding=1, bias=False)
+
 
 # Residual block
 class ResidualBlock(pl.LightningModule):
@@ -49,6 +48,7 @@ class ResidualBlock(pl.LightningModule):
         out += residual
         out = self.relu(out)
         return out
+
 
 # ResNet
 class ResNet(pl.LightningModule):
@@ -94,30 +94,29 @@ class ResNet(pl.LightningModule):
 
     def training_step(self, batch, batch_idx):
         images, labels = batch
-        
+
         # Forward pass
         outputs = self(images)
         loss = F.cross_entropy(outputs, labels)
-        
+
         tensorboard_logs = {'train_loss': loss}
         # use key 'log'
         return {"loss": loss, 'log': tensorboard_logs}
 
     def train_dataloader(self):
         # CIFAR-10 dataset
-        train_dataset = torchvision.datasets.CIFAR10(root='../../data/',
-                                             train=True, 
-                                             transform=transform,
-                                             download=True)
+        train_dataset = CIFAR10LTNPZDataset(root='data',
+                                            train=True,
+                                            transform=transform)
 
         train_loader = torch.utils.data.DataLoader(dataset=train_dataset,
-                                           batch_size=100, 
-                                           shuffle=True)
+                                                   batch_size=100,
+                                                   shuffle=True)
         return train_loader
-    
+
     def validation_step(self, batch, batch_idx):
         images, labels = batch
-        
+
         # Forward pass
         outputs = self(images)
         loss = F.cross_entropy(outputs, labels)
@@ -127,16 +126,16 @@ class ResNet(pl.LightningModule):
 
     def val_dataloader(self):
         # CIFAR-10 dataset
-        test_dataset = torchvision.datasets.CIFAR10(root='../../data/',
-                                            train=False, 
-                                            transform=transforms.ToTensor())
+        test_dataset = CIFAR10LTNPZDataset(root='data',
+                                           train=False)
 
         test_loader = torch.utils.data.DataLoader(dataset=test_dataset,
-                                          batch_size=100, 
-                                          shuffle=False)
+                                                  batch_size=100,
+                                                  shuffle=False)
 
         return test_loader
 
-trainer = Trainer(gpus =1, max_epochs=2, fast_dev_run = False)
-model = ResNet(ResidualBlock, [5,5,5])
+
+trainer = Trainer(gpus=1, max_epochs=2, fast_dev_run=False)
+model = ResNet(ResidualBlock, [5, 5, 5])
 trainer.fit(model)
