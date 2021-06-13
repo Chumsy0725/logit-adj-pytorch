@@ -8,13 +8,16 @@ from dataset import CIFAR10LTNPZDataset
 device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 
 # Hyper-parameters
-num_epochs = 11
+num_epochs = 100
 learning_rate = 0.001
 
 # Image preprocessing modules
 transform = transforms.Compose([
+    transforms.Pad(4),
+    transforms.RandomCrop(32),
+    transforms.RandomHorizontalFlip(),
     transforms.Normalize(mean=[0.485, 0.456, 0.406],
-                         std=[0.229, 0.224, 0.225])
+                         std=[0.229, 0.224, 0.225]),
 ])
 
 # CIFAR-10 dataset

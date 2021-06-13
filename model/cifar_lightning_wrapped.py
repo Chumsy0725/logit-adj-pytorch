@@ -10,8 +10,11 @@ classes = ('plane', 'car', 'bird', 'cat',
            'deer', 'dog', 'frog', 'horse', 'ship', 'truck')
 
 transform = transforms.Compose([
+    transforms.Pad(4),
+    transforms.RandomCrop(32),
+    transforms.RandomHorizontalFlip(),
     transforms.Normalize(mean=[0.485, 0.456, 0.406],
-                         std=[0.229, 0.224, 0.225])
+                         std=[0.229, 0.224, 0.225]),
 ])
 
 # Hyper-parameters

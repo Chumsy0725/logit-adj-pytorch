@@ -22,12 +22,17 @@ class _CIFARLTNPZDataset(TensorDataset):
         loaded_file_data = np.load(file_path, allow_pickle=True)
         return loaded_file_data["arr_0"], loaded_file_data["arr_1"]
 
-    def __getitem__(self, idx):
-        image, label = super().__getitem__(idx)
+    def _process_image(self, image):
         image = image.squeeze()
         image = image.transpose(1, 2).transpose(0, 1)
         if self._m_transform:
             image = self._m_transform(image)
+
+        return image
+
+    def __getitem__(self, idx):
+        image, label = super().__getitem__(idx)
+        image = self._process_image(image)
 
         label = label.numpy()[0]
 
