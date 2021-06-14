@@ -93,7 +93,7 @@ class ResNet(pl.LightningModule):
         return out
 
     def configure_optimizers(self):
-        return torch.optim.SGD(self.parameters(), lr=learning_rate)
+        return torch.optim.SGD(self.parameters(), lr=learning_rate, momentum=0.9)
 
     def training_step(self, batch, batch_idx):
         images, labels = batch

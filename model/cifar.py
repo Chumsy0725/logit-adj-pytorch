@@ -9,7 +9,7 @@ device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 
 # Hyper-parameters
 num_epochs = 100
-learning_rate = 0.001
+learning_rate = 0.1
 
 # Image preprocessing modules
 transform = transforms.Compose([
@@ -44,7 +44,7 @@ model = Resnet32().to(device)
 
 # Loss and optimizer
 criterion = nn.CrossEntropyLoss()
-optimizer = torch.optim.SGD(model.parameters(), lr=learning_rate)
+optimizer = torch.optim.SGD(model.parameters(), lr=learning_rate, momentum=0.9)
 
 
 # For updating learning rate
