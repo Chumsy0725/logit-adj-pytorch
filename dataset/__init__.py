@@ -1,12 +1,14 @@
+import abc
 from torch.utils.data import TensorDataset
 import numpy as np
 import os
 import torch
+from torchvision.datasets import CIFAR10, CIFAR100
 
 
 class _CIFARLTNPZDataset(TensorDataset):
 
-    def __init__(self, cifar_prefix: str, root: str, train: bool, transform=None):
+    def __init__(self, cifar_prefix: str, root: str, train: bool, transform=None, download=False):
         self._m_transform = transform
 
         file_path: str = os.path.join(root, cifar_prefix + "_" + ("train" if train else "test") + ".npz")
@@ -38,14 +40,50 @@ class _CIFARLTNPZDataset(TensorDataset):
 
         return image, label
 
+    @abc.abstractmethod
+    def get_classes(self):
+        pass
+
+    @abc.abstractmethod
+    def get_identifier(self):
+        pass
+
+
+class CIFAR10Dataset(CIFAR10):
+
+    CLASSES = ('plane', 'car', 'bird', 'cat', 'deer', 'dog', 'frog', 'horse', 'ship', 'truck')
+
+    def get_classes(self):
+        return CIFAR10Dataset.CLASSES
+
+    def get_identifier(self):
+        return "cifar10"
+
+
+class CIFAR100Dataset(CIFAR100):
+
+    CLASSES = ()
+
+    def get_classes(self):
+        return CIFAR100Dataset.CLASSES
+
+    def get_identifier(self):
+        return "cifar100"
+
 
 class CIFAR10LTNPZDataset(_CIFARLTNPZDataset):
 
     PREFIX_DATASET_TRAIN = "cifar10-lt"
     PREFIX_DATASET_TEST = "cifar10"
 
-    def __init__(self, root: str, train: bool, transform=None):
-        super().__init__(CIFAR10LTNPZDataset.PREFIX_DATASET_TRAIN if train else CIFAR10LTNPZDataset.PREFIX_DATASET_TEST, root, train, transform)
+    def __init__(self, root: str, train: bool, transform=None, download=False):
+        super().__init__(CIFAR10LTNPZDataset.PREFIX_DATASET_TRAIN if train else CIFAR10LTNPZDataset.PREFIX_DATASET_TEST, root, train, transform, download)
+
+    def get_classes(self):
+        return CIFAR10Dataset.CLASSES
+
+    def get_identifier(self):
+        return "cifar10-lt"
 
 
 class CIFAR100LTNPZDataset(_CIFARLTNPZDataset):
@@ -53,5 +91,11 @@ class CIFAR100LTNPZDataset(_CIFARLTNPZDataset):
     PREFIX_DATASET_TRAIN = "cifar100-lt"
     PREFIX_DATASET_TEST = "cifar100"
 
-    def __init__(self, root: str, train: bool, transform=None):
-        super().__init__(CIFAR100LTNPZDataset.PREFIX_DATASET_TRAIN if train else CIFAR100LTNPZDataset.PREFIX_DATASET_TEST, root, train, transform)
+    def __init__(self, root: str, train: bool, transform=None, download=False):
+        super().__init__(CIFAR100LTNPZDataset.PREFIX_DATASET_TRAIN if train else CIFAR100LTNPZDataset.PREFIX_DATASET_TEST, root, train, transform, download)
+
+    def get_classes(self):
+        return CIFAR100Dataset.CLASSES
+
+    def get_identifier(self):
+        return "cifar100-lt"
