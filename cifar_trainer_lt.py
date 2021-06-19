@@ -83,11 +83,11 @@ def main():
 
     # Data loader
     train_loader = torch.utils.data.DataLoader(dataset=train_dataset,
-                                               batch_size=100,
+                                               batch_size=args.batch_size,
                                                shuffle=True)
 
     val_loader = torch.utils.data.DataLoader(dataset=test_dataset,
-                                             batch_size=100,
+                                             batch_size=args.batch_size,
                                              shuffle=False)
 
     # define loss function (criterion) and optimizer
