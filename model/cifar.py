@@ -8,8 +8,8 @@ from dataset import CIFAR10LTNPZDataset
 device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 
 # Hyper-parameters
-num_epochs = 11
-learning_rate = 0.001
+num_epochs = 1
+learning_rate = 0.01
 
 # Image preprocessing modules
 transform = transforms.Compose([
@@ -81,7 +81,7 @@ PATH = './cnn.pth'
 torch.save(model.state_dict(), PATH)
 
 # Test the model
-batch_size = 100
+batch_size = 128
 with torch.no_grad():
     n_correct = 0
     n_samples = 0
@@ -96,7 +96,7 @@ with torch.no_grad():
         n_samples += labels.size(0)
         n_correct += (predicted == labels).sum().item()
 
-        for i in range(batch_size):
+        for i in range(labels.size(0)):
             label = labels[i]
             pred = predicted[i]
             if label == pred:
@@ -109,3 +109,4 @@ with torch.no_grad():
     for i in range(10):
         acc = 100.0 * n_class_correct[i] / n_class_samples[i]
         print(f'Accuracy of {classes[i]}: {acc} %')
+
