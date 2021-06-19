@@ -10,8 +10,11 @@ classes = ('plane', 'car', 'bird', 'cat',
            'deer', 'dog', 'frog', 'horse', 'ship', 'truck')
 
 transform = transforms.Compose([
+    transforms.Pad(4),
+    transforms.RandomCrop(32),
+    transforms.RandomHorizontalFlip(),
     transforms.Normalize(mean=[0.485, 0.456, 0.406],
-                         std=[0.229, 0.224, 0.225])
+                         std=[0.229, 0.224, 0.225]),
 ])
 
 # Hyper-parameters
@@ -90,7 +93,7 @@ class ResNet(pl.LightningModule):
         return out
 
     def configure_optimizers(self):
-        return torch.optim.Adam(self.parameters(), lr=learning_rate)
+        return torch.optim.SGD(self.parameters(), lr=learning_rate, momentum=0.9)
 
     def training_step(self, batch, batch_idx):
         images, labels = batch
