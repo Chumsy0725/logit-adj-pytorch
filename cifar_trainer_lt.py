@@ -71,20 +71,15 @@ def main():
 
     cudnn.benchmark = True
 
-    normalize = transforms.Normalize(mean=[0.485, 0.456, 0.406],
-                                     std=[0.229, 0.224, 0.225])
-
     # CIFAR-10 dataset
     train_dataset = CIFAR10LTNPZDataset(root='data',
                                         train=True,
                                         transform=transforms.Compose([
                                             transforms.RandomHorizontalFlip(),
-                                            transforms.RandomCrop(32, 4),
-                                            normalize, ]))
+                                            transforms.RandomCrop(32, 4) ]))
 
     test_dataset = CIFAR10LTNPZDataset(root='data',
-                                       train=False,
-                                       transform=normalize)
+                                       train=False)
 
     # Data loader
     train_loader = torch.utils.data.DataLoader(dataset=train_dataset,
