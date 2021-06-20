@@ -114,12 +114,13 @@ def main():
     for epoch in range(args.start_epoch, args.epochs):
 
         # train for one epoch
-        print('current lr {:.5e}'.format(optimizer.param_groups[0]['lr']))
+        # print('current lr {:.5e}'.format(optimizer.param_groups[0]['lr']))
         train(train_loader, model, criterion, optimizer, epoch)
         lr_scheduler.step()
 
         # evaluate on validation set
-        acc = validate(val_loader, model, criterion)
+        if epoch % args.save_every == 0:
+            acc = validate(val_loader, model, criterion)
 
         # remember best prec@1 and save checkpoint
         is_best = acc > best_acc
