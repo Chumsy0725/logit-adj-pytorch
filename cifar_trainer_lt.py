@@ -176,13 +176,20 @@ def train(train_loader, model, criterion, optimizer, epoch):
         batch_time.update(time.time() - end)
         end = time.time()
 
-        if i % args.print_freq == 0:
-            print('Epoch: [{0}][{1}/{2}]\t'
-                  'Time {batch_time.val:.3f} ({batch_time.avg:.3f})\t'
-                  'Training Loss | {loss.avg:.4f} \t'
-                  'Training Accuracy | {accuracies.avg:.3f} '.format(epoch, i, len(train_loader),
-                                                                     batch_time=batch_time, loss=losses,
-                                                                     accuracies=accuracies))
+        # if i % args.print_freq == 0:
+        #     print('Epoch: [{0}][{1}/{2}]\t'
+        #           'Time {batch_time.val:.3f} ({batch_time.avg:.3f})\t'
+        #           'Training Loss | {loss.avg:.4f} \t'
+        #           'Training Accuracy | {accuracies.avg:.3f} '.format(epoch, i, len(train_loader),
+        #                                                              batch_time=batch_time, loss=losses,
+        #                                                              accuracies=accuracies))
+
+    print('Epoch: [{0}]\t'
+          'Time {batch_time.val:.3f} ({batch_time.avg:.3f})\t'
+          'Training Loss | {loss.avg:.4f} \t'
+          'Training Accuracy | {accuracies.avg:.3f} '.format(epoch,
+                                                             batch_time=batch_time, loss=losses,
+                                                             accuracies=accuracies))
 
 
 def validate(val_loader, model, criterion):
