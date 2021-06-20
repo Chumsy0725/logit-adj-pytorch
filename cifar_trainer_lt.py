@@ -1,7 +1,7 @@
 import argparse
 import os
 import time
-
+import numpy as np
 import torch
 import torch.nn as nn
 import torch.nn.parallel
@@ -41,6 +41,8 @@ parser.add_argument('--save-dir', dest='save_dir',
 parser.add_argument('--save-every', dest='save_every',
                     help='Saves checkpoints at every specified number of epochs',
                     type=int, default=10)
+parser.add_argument('--post_hoc', help='adjust logits post hoc', type=bool, default=True)
+parser.add_argument('--tro', help='adjust logits post hoc', type=float, default=1.0)
 
 device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 best_acc = 0
@@ -70,7 +72,7 @@ def main():
         else:
             print("=> no checkpoint found at '{}'".format(args.resume))
 
-    cudnn.benchmark = True
+    # cudnn.benchmark = True
 
     # CIFAR-10 dataset
     train_dataset = CIFAR10LTNPZDataset(root='data',
@@ -90,6 +92,8 @@ def main():
     val_loader = torch.utils.data.DataLoader(dataset=test_dataset,
                                              batch_size=args.batch_size,
                                              shuffle=False)
+
+    args.logit_adjustments = compute_adjustment(train_loader)
 
     # define loss function (criterion) and optimizer
     criterion = nn.CrossEntropyLoss().to(device)
@@ -200,6 +204,9 @@ def validate(val_loader, model, criterion):
 
             # compute output
             output = model(input_var)
+            if args.post_hoc:
+                output = output + args.logit_adjustments
+
             loss = criterion(output, target_var)
 
             output = output.float()
@@ -219,6 +226,21 @@ def validate(val_loader, model, criterion):
               'Validation Accuracy |  {accuracies.avg:.3f}'.format(batch_time=batch_time, loss=losses,
                                                                    accuracies=accuracies))
     return accuracies.avg
+
+
+def compute_adjustment(train_loader):
+    label_freq = {}
+    for i, (inputs, target) in enumerate(train_loader):
+        target = target.to(device)
+        for j in target:
+            key = str(j.item())
+            label_freq[key] = label_freq.get(key, 0) + 1
+    label_freq = dict(sorted(label_freq.items()))
+    label_freq_array = np.array(list(label_freq.values()))
+    adjustments = -1 * args.tro * np.log(label_freq_array)
+    adjustments = torch.from_numpy(adjustments)
+    adjustments = adjustments.to(device)
+    return adjustments
 
 
 if __name__ == '__main__':
