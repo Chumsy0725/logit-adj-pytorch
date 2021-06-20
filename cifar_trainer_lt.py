@@ -53,7 +53,7 @@ args = parser.parse_args()
 def main():
     global args, best_acc
     # cant do both at same time
-    assert (args.logit_adj_post and args.logit_adj_train)
+    assert (not (args.logit_adj_post and args.logit_adj_train))
     # Check the save_dir exists or not
     if not os.path.exists(args.save_dir):
         os.makedirs(args.save_dir)
