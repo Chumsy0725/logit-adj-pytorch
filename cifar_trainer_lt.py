@@ -53,7 +53,7 @@ args = parser.parse_args()
 def main():
     global args, best_acc
     # cant do both at same time
-    assert(args.logit_adj_post and args.logit_adj_train)
+    assert (args.logit_adj_post and args.logit_adj_train)
     # Check the save_dir exists or not
     if not os.path.exists(args.save_dir):
         os.makedirs(args.save_dir)
@@ -222,7 +222,7 @@ def validate(val_loader, model, criterion):
             # compute output
             output = model(input_var)
             if args.logit_adj_post:
-                output = output + args.logit_adjustments
+                output = output - args.logit_adjustments
 
             loss = criterion(output, target_var)
 
@@ -254,7 +254,7 @@ def compute_adjustment(train_loader):
             label_freq[key] = label_freq.get(key, 0) + 1
     label_freq = dict(sorted(label_freq.items()))
     label_freq_array = np.array(list(label_freq.values()))
-    adjustments = -1 * args.tro * np.log(label_freq_array)
+    adjustments = args.tro * np.log(label_freq_array)
     adjustments = torch.from_numpy(adjustments)
     adjustments = adjustments.to(device)
     return adjustments
