@@ -138,7 +138,10 @@ def main():
         #     'best_acc': best_acc,
         # }, is_best, filename=os.path.join(args.save_dir, 'model_{}.th'))
 
-    save_checkpoint(model.state_dict(), True, filename=os.path.join(args.save_dir, 'model_{}.th'.format(acc)))
+    save_checkpoint(model.state_dict(), True, filename=os.path.join(args.save_dir,
+                                                                    'model_acc:{}_adjlogit:{}_tro:{}.th'.format(acc,
+                                                                                                                args.post_hoc,
+                                                                                                                args.tro)))
 
     class_accuracy(val_loader, model)
 
