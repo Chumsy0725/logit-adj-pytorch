@@ -37,7 +37,8 @@ def accuracy(outputs, labels):
     acc = 100.0 * n_correct / n_samples
     return acc
 
-def class_accuracy(test_loader, model, classes = classes_10):
+
+def class_accuracy(test_loader, model, classes=classes_10):
     """ Computes the accuracy for each class"""
 
     with torch.no_grad():
@@ -57,6 +58,9 @@ def class_accuracy(test_loader, model, classes = classes_10):
                     n_class_correct[label] += 1
                 n_class_samples[label] += 1
 
+        avg_acc = 0
         for i in range(10):
             acc = 100.0 * n_class_correct[i] / n_class_samples[i]
+            avg_acc += acc
             print(f'Accuracy of {classes[i]}: {acc} %')
+        print("Average accuracy:{}".format(avg_acc / 10))
