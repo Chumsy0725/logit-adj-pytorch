@@ -42,6 +42,7 @@ parser.add_argument('--save-every', dest='save_every',
                     help='Saves checkpoints at every specified number of epochs',
                     type=int, default=10)
 
+device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 best_acc = 0
 args = parser.parse_args()
 
@@ -54,7 +55,7 @@ def main():
         os.makedirs(args.save_dir)
 
     model = torch.nn.DataParallel(resnet32())
-    model.cuda()
+    model = model.to(device)
 
     # optionally resume from a checkpoint
     if args.resume:
@@ -91,7 +92,7 @@ def main():
                                              shuffle=False)
 
     # define loss function (criterion) and optimizer
-    criterion = nn.CrossEntropyLoss().cuda()
+    criterion = nn.CrossEntropyLoss().to(device)
 
     optimizer = torch.optim.SGD(model.parameters(),
                                 args.lr,
@@ -147,8 +148,8 @@ def train(train_loader, model, criterion, optimizer, epoch):
 
     end = time.time()
     for i, (inputs, target) in enumerate(train_loader):
-        target = target.cuda()
-        input_var = inputs.cuda()
+        target = target.to(device)
+        input_var = inputs.to(device)
         target_var = target
 
         # compute output
@@ -193,9 +194,9 @@ def validate(val_loader, model, criterion):
     end = time.time()
     with torch.no_grad():
         for i, (inputs, target) in enumerate(val_loader):
-            target = target.cuda()
-            input_var = inputs.cuda()
-            target_var = target.cuda()
+            target = target.to(device)
+            input_var = inputs.to(device)
+            target_var = target.to(device)
 
             # compute output
             output = model(input_var)
