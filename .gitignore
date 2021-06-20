@@ -2,3 +2,4 @@ __pycache__
 data/*
 .idea
 git_commit.sh
+save_temp

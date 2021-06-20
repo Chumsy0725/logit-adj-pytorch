@@ -77,7 +77,7 @@ def main():
                                         train=True,
                                         transform=transforms.Compose([
                                             transforms.RandomHorizontalFlip(),
-                                            transforms.RandomCrop(32, 4) ]))
+                                            transforms.RandomCrop(32, 4)]))
 
     test_dataset = CIFAR10LTNPZDataset(root='data',
                                        train=False)
