@@ -41,7 +41,8 @@ parser.add_argument('--save-dir', dest='save_dir',
 parser.add_argument('--save-every', dest='save_every',
                     help='Saves checkpoints at every specified number of epochs',
                     type=int, default=10)
-parser.add_argument('--post_hoc', help='adjust logits post hoc', type=bool, default=True)
+parser.add_argument('--logit_adj_post', help='adjust logits post hoc', type=bool, default=False)
+parser.add_argument('--logit_adj_train', help='adjust logits post hoc', type=bool, default=True)
 parser.add_argument('--tro', help='adjust logits post hoc', type=float, default=1.0)
 
 device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
@@ -51,7 +52,8 @@ args = parser.parse_args()
 
 def main():
     global args, best_acc
-
+    # cant do both at same time
+    assert(args.logit_adj_post and args.logit_adj_train)
     # Check the save_dir exists or not
     if not os.path.exists(args.save_dir):
         os.makedirs(args.save_dir)
@@ -140,7 +142,7 @@ def main():
 
     save_checkpoint(model.state_dict(), True, filename=os.path.join(args.save_dir,
                                                                     'model_acc:{}_adjlogit:{}_tro:{}.th'.format(acc,
-                                                                                                                args.post_hoc,
+                                                                                                                args.logit_adj_post,
                                                                                                                 args.tro)))
 
     class_accuracy(val_loader, model)
@@ -164,6 +166,8 @@ def train(train_loader, model, criterion, optimizer, epoch):
 
         # compute output
         output = model(input_var)
+        if args.logit_adj_train:
+            output = output + args.logit_adjustments
         loss = criterion(output, target_var)
 
         # compute gradient and do SGD step
@@ -217,7 +221,7 @@ def validate(val_loader, model, criterion):
 
             # compute output
             output = model(input_var)
-            if args.post_hoc:
+            if args.logit_adj_post:
                 output = output + args.logit_adjustments
 
             loss = criterion(output, target_var)
