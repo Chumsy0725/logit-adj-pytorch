@@ -123,20 +123,22 @@ def main():
             acc = validate(val_loader, model, criterion)
 
         # remember best prec@1 and save checkpoint
-        is_best = acc > best_acc
-        best_acc = max(acc, best_acc)
+        # is_best = acc > best_acc
+        # best_acc = max(acc, best_acc)
 
-        if epoch > 0 and epoch % args.save_every == 0:
-            save_checkpoint({
-                'epoch': epoch + 1,
-                'state_dict': model.state_dict(),
-                'best_acc': best_acc,
-            }, is_best, filename=os.path.join(args.save_dir, 'checkpoint.th'))
+        # if epoch > 0 and epoch % args.save_every == 0:
+        #     save_checkpoint({
+        #         'epoch': epoch + 1,
+        #         'state_dict': model.state_dict(),
+        #         'best_acc': best_acc,
+        #     }, is_best, filename=os.path.join(args.save_dir, 'checkpoint.th'))
 
-        save_checkpoint({
-            'state_dict': model.state_dict(),
-            'best_acc': best_acc,
-        }, is_best, filename=os.path.join(args.save_dir, 'model.th'))
+        # save_checkpoint({
+        #     'state_dict': model.state_dict(),
+        #     'best_acc': best_acc,
+        # }, is_best, filename=os.path.join(args.save_dir, 'model_{}.th'))
+
+    save_checkpoint(model.state_dict(), True, filename=os.path.join(args.save_dir, 'model_{}.th'.format(acc)))
 
     class_accuracy(val_loader, model)
 
