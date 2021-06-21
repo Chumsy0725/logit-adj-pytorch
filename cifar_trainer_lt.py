@@ -17,7 +17,7 @@ parser = argparse.ArgumentParser(
     description='PyTorch implementation of the paper: Long-tail Learning via Logit Adjustment'
 )
 
-parser.add_argument('--epochs', default=200, type=int, metavar='N',
+parser.add_argument('--epochs', default=1241, type=int, metavar='N',
                     help='number of total epochs to run')
 parser.add_argument('--start-epoch', default=0, type=int, metavar='N',
                     help='manual epoch number ')
@@ -81,10 +81,12 @@ def main():
                                         train=True,
                                         transform=transforms.Compose([
                                             transforms.RandomHorizontalFlip(),
-                                            transforms.RandomCrop(32, 4)]))
+                                            transforms.RandomCrop(32, 4),
+                                            transforms.Normalize(mean=[0.5, 0.5, 0.5], std=[1.0, 1.0, 1.0])]))
 
     test_dataset = CIFAR10LTNPZDataset(root='data',
-                                       train=False)
+                                       train=False,
+                                       transform=transforms.Normalize(mean=[0.5, 0.5, 0.5], std=[1.0, 1.0, 1.0]))
 
     # Data loader
     train_loader = torch.utils.data.DataLoader(dataset=train_dataset,
@@ -106,12 +108,11 @@ def main():
                                 weight_decay=args.weight_decay)
 
     lr_scheduler = torch.optim.lr_scheduler.MultiStepLR(optimizer,
-                                                        milestones=[160, 180],
-                                                        last_epoch=args.start_epoch - 1)
+                                                        milestones=[604, 926, 1128])
 
     if args.evaluate:
         validate(val_loader, model, criterion)
-        return
+    return
 
     for epoch in range(args.start_epoch, args.epochs):
 
