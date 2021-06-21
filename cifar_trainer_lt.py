@@ -112,7 +112,7 @@ def main():
 
     if args.evaluate:
         validate(val_loader, model, criterion)
-    return
+        return
 
     for epoch in range(args.start_epoch, args.epochs):
 
