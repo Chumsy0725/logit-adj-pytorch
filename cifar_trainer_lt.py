@@ -41,9 +41,12 @@ parser.add_argument('--save-dir', dest='save_dir',
 parser.add_argument('--save-every', dest='save_every',
                     help='Saves checkpoints at every specified number of epochs',
                     type=int, default=10)
-parser.add_argument('--logit_adj_post', help='adjust logits post hoc', type=bool, default=False)
-parser.add_argument('--logit_adj_train', help='adjust logits post hoc', type=bool, default=True)
-parser.add_argument('--tro', help='adjust logits post hoc', type=float, default=1.0)
+parser.add_argument('--logit_adj_post', help='adjust logits post hoc',
+                    type=bool, default=False)
+parser.add_argument('--logit_adj_train', help='adjust logits post hoc',
+                    type=bool, default=False)
+parser.add_argument('--tro', help='adjust logits post hoc',
+                    type=float, default=1.0)
 
 device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 best_acc = 0
@@ -74,17 +77,17 @@ def main():
         else:
             print("=> no checkpoint found at '{}'".format(args.resume))
 
-    # cudnn.benchmark = True
+    cudnn.benchmark = True
 
-    # CIFAR-10 dataset
-    train_dataset = CIFAR10LTNPZDataset(root='data',
+    # CIFAR-lt dataset
+    train_dataset = CIFAR10LTNPZDataset(root='../input/cifar10-lt',
                                         train=True,
                                         transform=transforms.Compose([
                                             transforms.RandomHorizontalFlip(),
                                             transforms.RandomCrop(32, 4),
                                             transforms.Normalize(mean=[0.5, 0.5, 0.5], std=[1.0, 1.0, 1.0])]))
 
-    test_dataset = CIFAR10LTNPZDataset(root='data',
+    test_dataset = CIFAR10LTNPZDataset(root='../input/cifar10-lt',
                                        train=False,
                                        transform=transforms.Normalize(mean=[0.5, 0.5, 0.5], std=[1.0, 1.0, 1.0]))
 
@@ -117,7 +120,6 @@ def main():
     for epoch in range(args.start_epoch, args.epochs):
 
         # train for one epoch
-        # print('current lr {:.5e}'.format(optimizer.param_groups[0]['lr']))
         train(train_loader, model, criterion, optimizer, epoch)
         lr_scheduler.step()
 
@@ -125,27 +127,12 @@ def main():
         if epoch % args.save_every == 0:
             acc = validate(val_loader, model, criterion)
 
-        # remember best prec@1 and save checkpoint
-        # is_best = acc > best_acc
-        # best_acc = max(acc, best_acc)
-
-        # if epoch > 0 and epoch % args.save_every == 0:
-        #     save_checkpoint({
-        #         'epoch': epoch + 1,
-        #         'state_dict': model.state_dict(),
-        #         'best_acc': best_acc,
-        #     }, is_best, filename=os.path.join(args.save_dir, 'checkpoint.th'))
-
-        # save_checkpoint({
-        #     'state_dict': model.state_dict(),
-        #     'best_acc': best_acc,
-        # }, is_best, filename=os.path.join(args.save_dir, 'model_{}.th'))
-
-    save_checkpoint(model.state_dict(), True, filename=os.path.join(args.save_dir,
-                                                                    'model_acc:{}_adjlogit:{}_tro:{}.th'.format(acc,
-                                                                                                                args.logit_adj_post,
-                                                                                                                args.tro)))
-
+    save_checkpoint(model.state_dict(), True,
+                    filename=os.path.join(args.save_dir,
+                                          'model_acc:{}_adjlogit:{}_tro:{}.th'.format(acc,
+                                                                                      args.logit_adj_post,
+                                                                                      args.tro)))
+    acc = validate(val_loader, model, criterion)
     class_accuracy(val_loader, model)
 
 
@@ -186,14 +173,6 @@ def train(train_loader, model, criterion, optimizer, epoch):
         # measure elapsed time
         batch_time.update(time.time() - end)
         end = time.time()
-
-        # if i % args.print_freq == 0:
-        #     print('Epoch: [{0}][{1}/{2}]\t'
-        #           'Time {batch_time.val:.3f} ({batch_time.avg:.3f})\t'
-        #           'Training Loss | {loss.avg:.4f} \t'
-        #           'Training Accuracy | {accuracies.avg:.3f} '.format(epoch, i, len(train_loader),
-        #                                                              batch_time=batch_time, loss=losses,
-        #                                                              accuracies=accuracies))
 
     print('Epoch: [{0}]\t'
           'Time {batch_time.val:.3f} ({batch_time.avg:.3f})\t'

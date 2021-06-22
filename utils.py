@@ -64,3 +64,6 @@ def class_accuracy(test_loader, model, classes=classes_10):
             avg_acc += acc
             print(f'Accuracy of {classes[i]}: {acc} %')
         print("Average accuracy:{}".format(avg_acc / 10))
+
+
+
