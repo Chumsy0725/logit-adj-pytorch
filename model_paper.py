@@ -109,7 +109,7 @@ class ResNet(nn.Module):
         return out
 
 
-def Resnet32(num_classes=10):
+def resnet32(num_classes=10):
     return ResNet([(5, 16, 1), (5, 32, 2), (5, 64, 2)], num_classes)
 
 

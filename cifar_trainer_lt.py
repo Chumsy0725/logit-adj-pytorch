@@ -9,7 +9,7 @@ import torch.backends.cudnn as cudnn
 import torch.optim
 import torch.utils.data
 import torchvision.transforms as transforms
-from model import resnet32
+from model_paper import resnet32
 from dataset import CIFAR10LTNPZDataset
 from utils import AverageMeter, save_checkpoint, accuracy, class_accuracy
 
