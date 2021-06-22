@@ -9,7 +9,7 @@ import torch.backends.cudnn as cudnn
 import torch.optim
 import torch.utils.data
 import torchvision.transforms as transforms
-from model_paper import resnet32
+from model import resnet32
 from dataset import CIFAR10LTNPZDataset
 from utils import AverageMeter, save_checkpoint, accuracy, class_accuracy
 
@@ -80,14 +80,14 @@ def main():
     cudnn.benchmark = True
 
     # CIFAR-lt dataset
-    train_dataset = CIFAR10LTNPZDataset(root='../input/cifar10-lt',
+    train_dataset = CIFAR10LTNPZDataset(root='data',
                                         train=True,
                                         transform=transforms.Compose([
                                             transforms.RandomHorizontalFlip(),
                                             transforms.RandomCrop(32, 4),
                                             transforms.Normalize(mean=[0.5, 0.5, 0.5], std=[1.0, 1.0, 1.0])]))
 
-    test_dataset = CIFAR10LTNPZDataset(root='../input/cifar10-lt',
+    test_dataset = CIFAR10LTNPZDataset(root='data',
                                        train=False,
                                        transform=transforms.Normalize(mean=[0.5, 0.5, 0.5], std=[1.0, 1.0, 1.0]))
 
