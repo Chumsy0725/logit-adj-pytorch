@@ -42,7 +42,7 @@ parser.add_argument('--save-every', dest='save_every',
                     help='Saves checkpoints at every specified number of epochs',
                     type=int, default=10)
 parser.add_argument('--logit_adj_post', help='adjust logits post hoc', type=bool, default=False)
-parser.add_argument('--logit_adj_train', help='adjust logits post hoc', type=bool, default=True)
+parser.add_argument('--logit_adj_train', help='adjust logits post hoc', type=bool, default=False)
 parser.add_argument('--tro', help='adjust logits post hoc', type=float, default=1.0)
 
 device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
