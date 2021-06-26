@@ -3,3 +3,6 @@ data/*
 .idea
 git_commit.sh
 save_temp
+x-special/nautilus-clipboard
+copy
+data.zip
