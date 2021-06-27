@@ -38,7 +38,7 @@ def accuracy(outputs, labels):
     return acc
 
 
-def class_accuracy(test_loader, model, classes=classes_10):
+def class_accuracy(test_loader, model, args, classes=classes_10):
     """ Computes the accuracy for each class"""
 
     with torch.no_grad():
@@ -49,6 +49,8 @@ def class_accuracy(test_loader, model, classes=classes_10):
             labels = labels.cuda()
             outputs = model(images)
 
+            if args.logit_adj_post:
+                output = output - args.logit_adjustments
             _, predicted = torch.max(outputs, 1)
 
             for i in range(labels.size(0)):
@@ -64,6 +66,3 @@ def class_accuracy(test_loader, model, classes=classes_10):
             avg_acc += acc
             print(f'Accuracy of {classes[i]}: {acc} %')
         print("Average accuracy:{}".format(avg_acc / 10))
-
-
-

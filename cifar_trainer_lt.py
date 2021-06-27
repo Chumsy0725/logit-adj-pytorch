@@ -133,7 +133,7 @@ def main():
                                                                                       args.logit_adj_post,
                                                                                       args.tro)))
     acc = validate(val_loader, model, criterion)
-    class_accuracy(val_loader, model)
+    class_accuracy(val_loader, model, args)
 
 
 def train(train_loader, model, criterion, optimizer, epoch):
