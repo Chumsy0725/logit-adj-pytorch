@@ -76,7 +76,7 @@ def main():
                                      std=[0.229, 0.224, 0.225])
 
     train_loader = torch.utils.data.DataLoader(
-        datasets.CIFAR10(root='./data_cifar', train=True, transform=transforms.Compose([
+        datasets.CIFAR100(root='./data_cifar100', train=True, transform=transforms.Compose([
             transforms.RandomHorizontalFlip(),
             transforms.RandomCrop(32, 4),
             transforms.ToTensor(),
@@ -85,7 +85,7 @@ def main():
         batch_size=args.batch_size, shuffle=True, pin_memory=True)
 
     val_loader = torch.utils.data.DataLoader(
-        datasets.CIFAR10(root='./data_cifar', train=False, transform=transforms.Compose([
+        datasets.CIFAR100(root='./data_cifar100', train=False, transform=transforms.Compose([
             transforms.ToTensor(),
             normalize,
         ])),
@@ -216,7 +216,7 @@ def validate(val_loader, model, criterion):
 
         print('Time | {batch_time.val:.3f} ({batch_time.avg:.3f})\t'
               'Validation Loss | {loss.avg:.4f}\t'
-              'Validation Accuracy |  {accuracies.avg:.3f}'.format( batch_time=batch_time, loss=losses, accuracies=accuracies))
+              'Validation Accuracy |  {accuracies.avg:.3f}'.format(batch_time=batch_time, loss=losses, accuracies=accuracies))
     return accuracies.avg
 
 
