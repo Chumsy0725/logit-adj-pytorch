@@ -10,7 +10,7 @@ import torch.optim
 import torch.utils.data
 import torchvision.transforms as transforms
 from model import resnet32
-from dataset import CIFAR100LTNPZDataset
+from dataset import CIFAR10LTNPZDataset
 from utils import AverageMeter, save_checkpoint, accuracy, class_accuracy
 
 parser = argparse.ArgumentParser(
@@ -77,14 +77,14 @@ def main():
     cudnn.benchmark = True
 
     # CIFAR-10 dataset
-    train_dataset = CIFAR100LTNPZDataset(root='data',
+    train_dataset = CIFAR10LTNPZDataset(root='data',
                                         train=True,
                                         transform=transforms.Compose([
                                             transforms.RandomHorizontalFlip(),
                                             transforms.RandomCrop(32, 4),
                                             transforms.Normalize(mean=[0.5, 0.5, 0.5], std=[1.0, 1.0, 1.0])]))
 
-    test_dataset = CIFAR100LTNPZDataset(root='data',
+    test_dataset = CIFAR10LTNPZDataset(root='data',
                                        train=False,
                                        transform=transforms.Normalize(mean=[0.5, 0.5, 0.5], std=[1.0, 1.0, 1.0]))
 
