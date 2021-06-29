@@ -13,7 +13,6 @@ def get_arguments():
     parser.add_argument('--num_workers', default=2, type=int, metavar='N',
                         help='number of workers at dataloader')
 
-    parser.add_argument('--epochs', default=1241, type=int, help='number of total epochs to run')
     parser.add_argument('--batch_size', default=128, type=int, help='mini-batch size (default: 128)')
     parser.add_argument('--lr', default=0.1, type=float, help='initial learning rate')
     parser.add_argument('--momentum', default=0.9, type=float, help='momentum')

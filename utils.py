@@ -141,4 +141,7 @@ def get_loaders(args):
                              num_workers=args.num_workers)
 
     args.class_names = train_dataset.get_classes()
+    args.epochs = train_dataset.get_epoch()
+    args.scheduler_steps = train_dataset.get_scheduler()
+
     return train_loader, test_loader

@@ -26,18 +26,19 @@ def main():
 
     model = torch.nn.DataParallel(resnet32())
     model = model.to(device)
+
+    train_loader, val_loader = get_loaders(args)
+    args.logit_adjustments = compute_adjustment(train_loader, args)
+
     criterion = nn.CrossEntropyLoss().to(device)
     optimizer = torch.optim.SGD(model.parameters(),
                                 args.lr,
                                 momentum=args.momentum,
                                 weight_decay=args.weight_decay)
     lr_scheduler = torch.optim.lr_scheduler.MultiStepLR(optimizer,
-                                                        milestones=[604, 926, 1128])
+                                                        milestones=args.scheduler_steps)
 
     cudnn.benchmark = True
-
-    train_loader, val_loader = get_loaders(args)
-    args.logit_adjustments = compute_adjustment(train_loader, args)
 
     if args.evaluate:
         if os.path.isfile(os.path.join(model_loc, "model.th")):
