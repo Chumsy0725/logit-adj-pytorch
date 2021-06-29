@@ -75,7 +75,7 @@ def main():
     mdel_data = {"state_dict": model.state_dict()}
     torch.save(mdel_data, os.path.join(model_loc, file_name))
 
-    results = class_accuracy(val_loader, model, args, class_names)
+    results = class_accuracy(val_loader, model, args)
     results["OA"] = val_acc
     hyper_param = log_hyperparameter(args)
     writer.add_hparams(hparam_dict=hyper_param, metric_dict=results)
