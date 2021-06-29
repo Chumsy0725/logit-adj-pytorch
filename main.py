@@ -48,6 +48,7 @@ def main():
             val_loss, val_acc = validate(val_loader, model, criterion)
             results = class_accuracy(val_loader, model, args)
             results["OA"] = val_acc
+            print(results)
             hyper_param = log_hyperparameter(args)
             writer.add_hparams(hparam_dict=hyper_param, metric_dict=results)
             writer.close()
@@ -83,6 +84,7 @@ def main():
     results = class_accuracy(val_loader, model, args)
     results["OA"] = val_acc
     hyper_param = log_hyperparameter(args)
+    print(results)
     writer.add_hparams(hparam_dict=hyper_param, metric_dict=results)
     writer.close()
 
