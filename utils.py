@@ -1,6 +1,9 @@
 import torch
 import os
 import numpy as np
+from torch.utils.data import DataLoader
+from dataset.utils import DATASET_MAPPINGS
+from dataset.transforms import TRAIN_TRANSFORMS, TEST_TRANSFORMS
 
 classes_10 = ('plane', 'car', 'bird', 'cat', 'deer', 'dog', 'frog', 'horse', 'ship', 'truck')
 
@@ -24,11 +27,6 @@ class AverageMeter(object):
         self.avg = self.sum / self.count
 
 
-def save_checkpoint(state, filename='checkpoint.pth.tar'):
-    """ Save the training model """
-    torch.save(state, filename)
-
-
 def accuracy(outputs, labels):
     """Computes accuracy for given outputs and ground truths"""
 
@@ -39,9 +37,9 @@ def accuracy(outputs, labels):
     return acc
 
 
-def class_accuracy(test_loader, model, args, classes=classes_10):
+def class_accuracy(test_loader, model, args):
     """ Computes the accuracy for each class"""
-
+    classes = args.class_names
     with torch.no_grad():
         n_class_correct = [0 for i in range(10)]
         n_class_samples = [0 for i in range(10)]
@@ -93,7 +91,8 @@ def log_hyperparameter(args):
 
 def log_folders(args):
     log_dir = 'logs'
-    exp_dir = 'adjpost:{}_adjpost:{}_tro:{}'.format(
+    exp_dir = 'dataset:{}_adjpost:{}_adjtrain:{}_tro:{}'.format(
+        args.dataset,
         args.logit_adj_post,
         args.logit_adj_train,
         args.tro)
@@ -118,3 +117,28 @@ def compute_adjustment(train_loader, args):
     adjustments = torch.from_numpy(adjustments)
     adjustments = adjustments.to(args.device)
     return adjustments
+
+
+def get_loaders(args):
+    dataset = DATASET_MAPPINGS[args.dataset]
+    train_dataset = dataset(root=args.data_home,
+                            train=True,
+                            transform=TRAIN_TRANSFORMS[args.dataset],
+                            download=True)
+
+    test_dataset = dataset(root=args.data_home,
+                           train=False,
+                           transform=TEST_TRANSFORMS[args.dataset])
+
+    train_loader = DataLoader(dataset=train_dataset,
+                              batch_size=args.batch_size,
+                              shuffle=True,
+                              num_workers=args.num_workers)
+
+    test_loader = DataLoader(dataset=test_dataset,
+                             batch_size=args.batch_size,
+                             shuffle=False,
+                             num_workers=args.num_workers)
+
+    args.class_names = train_dataset.get_classes()
+    return train_loader, test_loader
