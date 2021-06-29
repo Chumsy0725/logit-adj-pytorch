@@ -1,8 +1,3 @@
-import argparse
-import os
-import time
-import numpy as np
-import torch
 import torch.nn as nn
 import torch.nn.parallel
 import torch.backends.cudnn as cudnn
@@ -11,71 +6,37 @@ import torch.utils.data
 import torchvision.transforms as transforms
 from model import resnet32
 from dataset import CIFAR10LTNPZDataset
-from utils import AverageMeter, save_checkpoint, accuracy, class_accuracy
+from utils import *
+from config import get_arguments
+from torch.utils.tensorboard import SummaryWriter
+from tqdm import tqdm
 
-parser = argparse.ArgumentParser(
-    description='PyTorch implementation of the paper: Long-tail Learning via Logit Adjustment'
-)
-
-parser.add_argument('--epochs', default=1241, type=int, metavar='N',
-                    help='number of total epochs to run')
-parser.add_argument('--start-epoch', default=0, type=int, metavar='N',
-                    help='manual epoch number ')
-parser.add_argument('-b', '--batch-size', default=128, type=int,
-                    metavar='N', help='mini-batch size (default: 128)')
-parser.add_argument('--lr', '--learning-rate', default=0.1, type=float,
-                    metavar='LR', help='initial learning rate')
-parser.add_argument('--momentum', default=0.9, type=float, metavar='M',
-                    help='momentum')
-parser.add_argument('--weight-decay', '--wd', default=1e-4, type=float,
-                    metavar='W', help='weight decay (default: 1e-4)')
-parser.add_argument('--print-freq', '-p', default=50, type=int,
-                    metavar='N', help='print frequency (default: 50)')
-parser.add_argument('--resume', default='', type=str, metavar='PATH',
-                    help='path to latest checkpoint (default: none)')
-parser.add_argument('-e', '--evaluate', dest='evaluate', action='store_true',
-                    help='evaluate model on validation set')
-parser.add_argument('--save-dir', dest='save_dir',
-                    help='The directory used to save the trained models',
-                    default='save_temp', type=str)
-parser.add_argument('--save-every', dest='save_every',
-                    help='Saves checkpoints at every specified number of epochs',
-                    type=int, default=10)
-parser.add_argument('--logit_adj_post', help='adjust logits post hoc',
-                    type=bool, default=False)
-parser.add_argument('--logit_adj_train', help='adjust logits post hoc',
-                    type=bool, default=False)
-parser.add_argument('--tro', help='adjust logits post hoc',
-                    type=float, default=1.0)
+parser = get_arguments()
+args = parser.parse_args()
 
 device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
-best_acc = 0
-args = parser.parse_args()
+args.device = device
+
+exp_loc, model_loc = log_folders(args)
+writer = SummaryWriter(log_dir=exp_loc)
 
 
 def main():
-    global args, best_acc
+    global args
     # cant do both at same time
     assert (not (args.logit_adj_post and args.logit_adj_train))
-    # Check the save_dir exists or not
-    if not os.path.exists(args.save_dir):
-        os.makedirs(args.save_dir)
 
     model = torch.nn.DataParallel(resnet32())
     model = model.to(device)
 
     # optionally resume from a checkpoint
     if args.resume:
-        if os.path.isfile(args.resume):
-            print("=> loading checkpoint '{}'".format(args.resume))
-            checkpoint = torch.load(args.resume)
-            args.start_epoch = checkpoint['epoch']
-            best_acc = checkpoint['best_acc']
+        if os.path.isfile(os.path.join(model_loc, "model.th")):
+            print("=> loading checkpoint ")
+            checkpoint = torch.load(os.path.join(model_loc, "model.th"))
             model.load_state_dict(checkpoint['state_dict'])
-            print("=> loaded checkpoint '{}' (epoch {})"
-                  .format(args.evaluate, checkpoint['epoch']))
         else:
-            print("=> no checkpoint found at '{}'".format(args.resume))
+            print("=> no checkpoint found")
 
     cudnn.benchmark = True
 
@@ -100,7 +61,7 @@ def main():
                                              batch_size=args.batch_size,
                                              shuffle=False)
 
-    args.logit_adjustments = compute_adjustment(train_loader)
+    args.logit_adjustments = compute_adjustment(train_loader, args)
 
     # define loss function (criterion) and optimizer
     criterion = nn.CrossEntropyLoss().to(device)
@@ -117,36 +78,46 @@ def main():
         validate(val_loader, model, criterion)
         return
 
-    for epoch in range(args.start_epoch, args.epochs):
+    loop = tqdm(range(0, args.epochs), total=args.epochs, leave=False)
+    val_loss, val_acc = 0, 0
+    for epoch in loop:
 
         # train for one epoch
-        train(train_loader, model, criterion, optimizer, epoch)
+        train_loss, train_acc = train(train_loader, model, criterion, optimizer, epoch)
+        writer.add_scalar("train/acc", train_acc, epoch)
+        writer.add_scalar("train/loss", train_loss, epoch)
         lr_scheduler.step()
 
         # evaluate on validation set
-        if epoch % args.save_every == 0:
-            acc = validate(val_loader, model, criterion)
+        if (epoch % args.log_val) == 0 or (epoch == (args.epochs - 1 + args.start_epoch)):
+            val_loss, val_acc = validate(val_loader, model, criterion)
+            writer.add_scalar("val/acc", val_acc, epoch)
+            writer.add_scalar("val/loss", val_loss, epoch)
 
-    save_checkpoint(model.state_dict(), True,
-                    filename=os.path.join(args.save_dir,
-                                          'model_acc:{}_adjlogit:{}_tro:{}.th'.format(acc,
-                                                                                      args.logit_adj_post,
-                                                                                      args.tro)))
-    acc = validate(val_loader, model, criterion)
-    class_accuracy(val_loader, model, args)
+        loop.set_description(f"Epoch [{epoch}/{args.epochs}")
+        loop.set_postfix(train_loss=f"{train_loss:.2f}", val_loss=f"{val_loss:.2f}", train_acc=f"{train_acc:.2f}",
+                         val_acc=f"{val_acc:.2f}")
+
+    file_name = 'model.th'
+    mdel_data = {"state_dict": model.state_dict(), "Val_acc": val_acc}
+    save_checkpoint(mdel_data, filename=os.path.join(model_loc, file_name))
+
+    results = class_accuracy(val_loader, model, args)
+    results["OA"] = val_acc
+    hyper_param = log_hyperparameter(args)
+    writer.add_hparams(hparam_dict=hyper_param, metric_dict=results)
+    writer.close()
 
 
 def train(train_loader, model, criterion, optimizer, epoch):
     """ Run one train epoch """
 
-    batch_time = AverageMeter()
     losses = AverageMeter()
     accuracies = AverageMeter()
 
     # switch to train mode
     model.train()
 
-    end = time.time()
     for i, (inputs, target) in enumerate(train_loader):
         target = target.to(device)
         input_var = inputs.to(device)
@@ -170,29 +141,18 @@ def train(train_loader, model, criterion, optimizer, epoch):
         losses.update(loss.item(), inputs.size(0))
         accuracies.update(acc, inputs.size(0))
 
-        # measure elapsed time
-        batch_time.update(time.time() - end)
-        end = time.time()
-
-    print('Epoch: [{0}]\t'
-          'Time {batch_time.val:.3f} ({batch_time.avg:.3f})\t'
-          'Training Loss | {loss.avg:.4f} \t'
-          'Training Accuracy | {accuracies.avg:.3f} '.format(epoch,
-                                                             batch_time=batch_time, loss=losses,
-                                                             accuracies=accuracies))
+    return losses.avg, accuracies.avg
 
 
 def validate(val_loader, model, criterion):
     """ Run evaluation """
 
-    batch_time = AverageMeter()
     losses = AverageMeter()
     accuracies = AverageMeter()
 
     # switch to evaluate mode
     model.eval()
 
-    end = time.time()
     with torch.no_grad():
         for i, (inputs, target) in enumerate(val_loader):
             target = target.to(device)
@@ -214,30 +174,7 @@ def validate(val_loader, model, criterion):
             losses.update(loss.item(), inputs.size(0))
             accuracies.update(acc, inputs.size(0))
 
-            # measure elapsed time
-            batch_time.update(time.time() - end)
-            end = time.time()
-
-        print('Time | {batch_time.val:.3f} ({batch_time.avg:.3f})\t'
-              'Validation Loss | {loss.avg:.4f}\t'
-              'Validation Accuracy |  {accuracies.avg:.3f}'.format(batch_time=batch_time, loss=losses,
-                                                                   accuracies=accuracies))
-    return accuracies.avg
-
-
-def compute_adjustment(train_loader):
-    label_freq = {}
-    for i, (inputs, target) in enumerate(train_loader):
-        target = target.to(device)
-        for j in target:
-            key = str(j.item())
-            label_freq[key] = label_freq.get(key, 0) + 1
-    label_freq = dict(sorted(label_freq.items()))
-    label_freq_array = np.array(list(label_freq.values()))
-    adjustments = args.tro * np.log(label_freq_array)
-    adjustments = torch.from_numpy(adjustments)
-    adjustments = adjustments.to(device)
-    return adjustments
+    return losses.avg, accuracies.avg
 
 
 if __name__ == '__main__':
