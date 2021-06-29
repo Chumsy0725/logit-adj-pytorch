@@ -45,7 +45,12 @@ def main():
             print("=> loading checkpoint ")
             checkpoint = torch.load(os.path.join(model_loc, "model.th"))
             model.load_state_dict(checkpoint['state_dict'])
-            validate(val_loader, model, criterion)
+            val_loss, val_acc = validate(val_loader, model, criterion)
+            results = class_accuracy(val_loader, model, args)
+            results["OA"] = val_acc
+            hyper_param = log_hyperparameter(args)
+            writer.add_hparams(hparam_dict=hyper_param, metric_dict=results)
+            writer.close()
         else:
             print("=> no checkpoint found")
 

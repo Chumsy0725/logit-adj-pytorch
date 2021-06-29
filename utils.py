@@ -91,9 +91,8 @@ def log_hyperparameter(args):
 
 def log_folders(args):
     log_dir = 'logs'
-    exp_dir = 'dataset:{}_adjpost:{}_adjtrain:{}_tro:{}'.format(
+    exp_dir = 'dataset:{}_adjtrain:{}_tro:{}'.format(
         args.dataset,
-        args.logit_adj_post,
         args.logit_adj_train,
         args.tro)
     exp_loc = os.path.join(log_dir, exp_dir)
