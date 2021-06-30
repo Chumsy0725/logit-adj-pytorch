@@ -25,10 +25,11 @@ def main():
     # cant do both at same time
     assert (not (args.logit_adj_post and args.logit_adj_train))
 
-    model = torch.nn.DataParallel(resnet32())
+    train_loader, val_loader = get_loaders(args)
+    num_class = len(args.class_names)
+    model = torch.nn.DataParallel(resnet32(num_classes=num_class))
     model = model.to(device)
 
-    train_loader, val_loader = get_loaders(args)
     criterion = nn.CrossEntropyLoss().to(device)
 
     if args.logit_adj_post:
