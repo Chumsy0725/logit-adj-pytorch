@@ -8,6 +8,7 @@ from utils import *
 from config import get_arguments
 from torch.utils.tensorboard import SummaryWriter
 from tqdm import tqdm
+from pprint import pprint
 
 parser = get_arguments()
 args = parser.parse_args()
@@ -30,9 +31,9 @@ def main():
     train_loader, val_loader = get_loaders(args)
     criterion = nn.CrossEntropyLoss().to(device)
 
-    if args.evaluate:
+    if args.logit_adj_post:
         if os.path.isfile(os.path.join(model_loc, "model.th")):
-            print("=> loading checkpoint ")
+            print("=> loading pretrained model ")
             checkpoint = torch.load(os.path.join(model_loc, "model.th"))
             model.load_state_dict(checkpoint['state_dict'])
             for tro in args.tro_post_range:
@@ -41,12 +42,12 @@ def main():
                 val_loss, val_acc = validate(val_loader, model, criterion)
                 results = class_accuracy(val_loader, model, args)
                 results["OA"] = val_acc
-                print(results)
+                pprint(results)
                 hyper_param = log_hyperparameter(args, tro)
                 writer.add_hparams(hparam_dict=hyper_param, metric_dict=results)
                 writer.close()
         else:
-            print("=> no checkpoint found")
+            print("=> No pre trained model found")
 
         return
 
@@ -88,7 +89,7 @@ def main():
     results = class_accuracy(val_loader, model, args)
     results["OA"] = val_acc
     hyper_param = log_hyperparameter(args, args.tro_train)
-    print(results)
+    pprint(results)
     writer.add_hparams(hparam_dict=hyper_param, metric_dict=results)
     writer.close()
 

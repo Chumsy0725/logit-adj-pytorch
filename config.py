@@ -18,7 +18,6 @@ def get_arguments():
     parser.add_argument('--momentum', default=0.9, type=float, help='momentum')
     parser.add_argument('--weight-decay', default=1e-4, type=float, help='weight decay (default: 1e-4)')
 
-    parser.add_argument('--evaluate', default=0, type=int, help='evaluate model')
     parser.add_argument('--log_val', help='compute val acc', type=int, default=10)
 
     parser.add_argument('--logit_adj_post', help='adjust logits post hoc', type=int, default=0, choices=[0, 1])
