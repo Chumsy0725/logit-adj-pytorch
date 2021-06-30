@@ -66,7 +66,7 @@ def class_accuracy(test_loader, model, args):
             acc = 100.0 * n_class_correct[i] / n_class_samples[i]
             avg_acc += acc
             results["class/" + classes[i]] = acc
-        results["AA"] = avg_acc / 10
+        results["AA"] = avg_acc / num_class
         return results
 
 
