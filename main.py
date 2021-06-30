@@ -110,6 +110,8 @@ def train(train_loader, model, criterion, optimizer):
 
         # compute output
         output = model(input_var)
+        acc = accuracy(output.data, target)
+
         if args.logit_adj_train:
             output = output + args.logit_adjustments
         loss = criterion(output, target_var)
@@ -119,10 +121,8 @@ def train(train_loader, model, criterion, optimizer):
         loss.backward()
         optimizer.step()
 
-        output = output.float()
-        loss = loss.float()
         # measure accuracy and record loss
-        acc = accuracy(output.data, target)
+
         losses.update(loss.item(), inputs.size(0))
         accuracies.update(acc, inputs.size(0))
 
@@ -146,13 +146,18 @@ def validate(val_loader, model, criterion):
 
             # compute output
             output = model(input_var)
+
             if args.logit_adj_post:
+                # loss term does not contain adjustment
+                loss = criterion(output, target_var)
                 output = output - args.logit_adjustments
 
-            loss = criterion(output, target_var)
+            elif args.logit_adj_train:
+                # loss term contain adjustment; no adjustment in logits
+                loss = criterion(output + args.logit_adjustments, target_var)
 
-            output = output.float()
-            loss = loss.float()
+            else:
+                loss = criterion(output, target_var)
 
             # measure accuracy and record loss
             acc = accuracy(output.data, target)
