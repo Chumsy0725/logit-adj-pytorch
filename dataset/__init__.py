@@ -107,7 +107,7 @@ class CIFAR10LTNPZDataset(_CIFARLTNPZDataset):
 
     def get_epoch(self):
         # 12406 10000
-        return 1  # 1241
+        return 1241
 
     def get_scheduler(self):
         return [604, 926, 1128]
