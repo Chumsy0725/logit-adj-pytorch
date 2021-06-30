@@ -23,6 +23,6 @@ def get_arguments():
 
     parser.add_argument('--logit_adj_post', help='adjust logits post hoc', type=int, default=0, choices=[0, 1])
     parser.add_argument('--logit_adj_train', help='adjust logits in trainingc', type=int, default=1, choices=[0, 1])
-    parser.add_argument('--tro', help='tro', type=float, default=1.0)
+    parser.add_argument('--tro_range', help='tro', type=list, default=[0.25, 0.5, 0.75, 1, 1.5, 2])
 
     return parser
