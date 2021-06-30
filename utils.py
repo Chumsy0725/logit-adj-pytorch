@@ -100,7 +100,7 @@ def log_folders(args):
     return exp_loc, model_loc
 
 
-def compute_adjustment(train_loader, args):
+def compute_adjustment(train_loader, tro, args):
     label_freq = {}
     for i, (inputs, target) in enumerate(train_loader):
         target = target.to(args.device)
@@ -109,7 +109,7 @@ def compute_adjustment(train_loader, args):
             label_freq[key] = label_freq.get(key, 0) + 1
     label_freq = dict(sorted(label_freq.items()))
     label_freq_array = np.array(list(label_freq.values()))
-    adjustments = args.tro * np.log(label_freq_array)
+    adjustments = tro * np.log(label_freq_array)
     adjustments = torch.from_numpy(adjustments)
     adjustments = adjustments.to(args.device)
     return adjustments

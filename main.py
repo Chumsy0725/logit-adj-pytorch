@@ -28,26 +28,15 @@ def main():
     model = model.to(device)
 
     train_loader, val_loader = get_loaders(args)
-    args.logit_adjustments = compute_adjustment(train_loader, args)
-
-    criterion = nn.CrossEntropyLoss().to(device)
-    optimizer = torch.optim.SGD(model.parameters(),
-                                args.lr,
-                                momentum=args.momentum,
-                                weight_decay=args.weight_decay)
-    lr_scheduler = torch.optim.lr_scheduler.MultiStepLR(optimizer,
-                                                        milestones=args.scheduler_steps)
-
-    cudnn.benchmark = True
 
     if args.evaluate:
         if os.path.isfile(os.path.join(model_loc, "model.th")):
             print("=> loading checkpoint ")
             checkpoint = torch.load(os.path.join(model_loc, "model.th"))
             model.load_state_dict(checkpoint['state_dict'])
-            for tro in args.tro_range:
+            for tro in args.tro_post_range:
                 args.tro = tro
-                args.logit_adjustments = compute_adjustment(train_loader, args)
+                args.logit_adjustments = compute_adjustment(train_loader, tro, args)
                 val_loss, val_acc = validate(val_loader, model, criterion)
                 results = class_accuracy(val_loader, model, args)
                 results["OA"] = val_acc
@@ -59,6 +48,18 @@ def main():
             print("=> no checkpoint found")
 
         return
+
+    args.logit_adjustments = compute_adjustment(train_loader, args.tro_train, args)
+
+    criterion = nn.CrossEntropyLoss().to(device)
+    optimizer = torch.optim.SGD(model.parameters(),
+                                args.lr,
+                                momentum=args.momentum,
+                                weight_decay=args.weight_decay)
+    lr_scheduler = torch.optim.lr_scheduler.MultiStepLR(optimizer,
+                                                        milestones=args.scheduler_steps)
+
+    cudnn.benchmark = True
 
     loop = tqdm(range(0, args.epochs), total=args.epochs, leave=False)
     val_loss, val_acc = 0, 0
