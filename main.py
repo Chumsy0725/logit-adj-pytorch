@@ -146,18 +146,14 @@ def validate(val_loader, model, criterion):
 
             # compute output
             output = model(input_var)
+            loss = criterion(output, target_var)
 
             if args.logit_adj_post:
-                # loss term does not contain adjustment
-                loss = criterion(output, target_var)
                 output = output - args.logit_adjustments
 
             elif args.logit_adj_train:
                 # loss term contain adjustment; no adjustment in logits
                 loss = criterion(output + args.logit_adjustments, target_var)
-
-            else:
-                loss = criterion(output, target_var)
 
             # measure accuracy and record loss
             acc = accuracy(output.data, target)
