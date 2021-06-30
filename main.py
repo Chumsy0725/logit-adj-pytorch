@@ -28,6 +28,7 @@ def main():
     model = model.to(device)
 
     train_loader, val_loader = get_loaders(args)
+    criterion = nn.CrossEntropyLoss().to(device)
 
     if args.evaluate:
         if os.path.isfile(os.path.join(model_loc, "model.th")):
@@ -41,7 +42,7 @@ def main():
                 results = class_accuracy(val_loader, model, args)
                 results["OA"] = val_acc
                 print(results)
-                hyper_param = log_hyperparameter(args)
+                hyper_param = log_hyperparameter(args, tro)
                 writer.add_hparams(hparam_dict=hyper_param, metric_dict=results)
                 writer.close()
         else:
@@ -51,7 +52,6 @@ def main():
 
     args.logit_adjustments = compute_adjustment(train_loader, args.tro_train, args)
 
-    criterion = nn.CrossEntropyLoss().to(device)
     optimizer = torch.optim.SGD(model.parameters(),
                                 args.lr,
                                 momentum=args.momentum,
@@ -87,7 +87,7 @@ def main():
 
     results = class_accuracy(val_loader, model, args)
     results["OA"] = val_acc
-    hyper_param = log_hyperparameter(args)
+    hyper_param = log_hyperparameter(args, args.tro_train)
     print(results)
     writer.add_hparams(hparam_dict=hyper_param, metric_dict=results)
     writer.close()

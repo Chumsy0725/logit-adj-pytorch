@@ -78,12 +78,13 @@ def make_dir(log_dir):
         pass
 
 
-def log_hyperparameter(args):
+def log_hyperparameter(args, tro):
     whole_dict = vars(args)
     hyperparam = {}
-    keys = ['logit_adj_post', 'logit_adj_train', 'tro']
+    keys = ['logit_adj_post', 'logit_adj_train']
     for key in keys:
         hyperparam[key] = whole_dict[key]
+    hyperparam['tro'] = tro * (hyperparam['logit_adj_post'] or hyperparam['logit_adj_train'])
     return hyperparam
 
 
