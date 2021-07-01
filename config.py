@@ -6,7 +6,7 @@ def get_arguments():
         description='PyTorch implementation of the paper: Long-tail Learning via Logit Adjustment'
     )
 
-    parser.add_argument('--dataset', default="cifar100-lt", type=str, help='Dataset to use.',
+    parser.add_argument('--dataset', default="cifar10-lt", type=str, help='Dataset to use.',
                         choices=["cifar10", "cifar100", "cifar10-lt", "cifar100-lt"])
     parser.add_argument('--data_home', default="data", type=str,
                         help='Directory where data files are stored.')

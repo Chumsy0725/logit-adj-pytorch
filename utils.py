@@ -109,7 +109,8 @@ def compute_adjustment(train_loader, tro, args):
             label_freq[key] = label_freq.get(key, 0) + 1
     label_freq = dict(sorted(label_freq.items()))
     label_freq_array = np.array(list(label_freq.values()))
-    adjustments = tro * np.log(label_freq_array)
+    label_freq_array = label_freq_array / label_freq_array.sum()
+    adjustments = np.log(label_freq_array ** tro + 1e-12)
     adjustments = torch.from_numpy(adjustments)
     adjustments = adjustments.to(args.device)
     return adjustments
