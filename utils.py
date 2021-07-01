@@ -5,8 +5,6 @@ from torch.utils.data import DataLoader
 from dataset.utils import DATASET_MAPPINGS
 from dataset.transforms import TRAIN_TRANSFORMS, TEST_TRANSFORMS
 
-classes_10 = ('plane', 'car', 'bird', 'cat', 'deer', 'dog', 'frog', 'horse', 'ship', 'truck')
-
 
 class AverageMeter(object):
     """Computes and stores the average and current value"""
@@ -40,9 +38,10 @@ def accuracy(outputs, labels):
 def class_accuracy(test_loader, model, args):
     """ Computes the accuracy for each class"""
     classes = args.class_names
+    num_class = len(args.class_names)
     with torch.no_grad():
-        n_class_correct = [0 for i in range(10)]
-        n_class_samples = [0 for i in range(10)]
+        n_class_correct = [0 for _ in range(num_class)]
+        n_class_samples = [0 for _ in range(num_class)]
         for images, labels in test_loader:
             images = images.to(args.device)
             labels = labels.to(args.device)
@@ -63,11 +62,11 @@ def class_accuracy(test_loader, model, args):
 
         results = {}
         avg_acc = 0
-        for i in range(10):
+        for i in range(num_class):
             acc = 100.0 * n_class_correct[i] / n_class_samples[i]
             avg_acc += acc
             results["class/" + classes[i]] = acc
-        results["AA"] = avg_acc / 10
+        results["AA"] = avg_acc / num_class
         return results
 
 
