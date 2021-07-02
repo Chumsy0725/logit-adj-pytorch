@@ -2,7 +2,7 @@ import torch.nn as nn
 import torch.nn.functional as F
 import torch.nn.init as init
 
-_BATCH_NORM_DECAY = 0.1
+_BATCH_NORM_DECAY = 0.9
 _BATCH_NORM_EPSILON = 1e-5
 
 
