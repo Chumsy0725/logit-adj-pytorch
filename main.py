@@ -29,6 +29,7 @@ def main():
     num_class = len(args.class_names)
     model = torch.nn.DataParallel(resnet32(num_classes=num_class))
     model = model.to(device)
+    cudnn.benchmark = True
 
     criterion = nn.CrossEntropyLoss().to(device)
 
@@ -62,7 +63,6 @@ def main():
     lr_scheduler = torch.optim.lr_scheduler.MultiStepLR(optimizer,
                                                         milestones=args.scheduler_steps)
 
-    cudnn.benchmark = True
 
     loop = tqdm(range(0, args.epochs), total=args.epochs, leave=False)
     val_loss, val_acc = 0, 0
