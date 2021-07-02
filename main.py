@@ -121,7 +121,7 @@ def train(train_loader, model, criterion, optimizer):
         loss_r = 0
         for p in model.parameters():
             loss_r += torch.sum(p**2)
-        loss = loss + loss_r
+        loss = loss + args.weight_decay*loss_r
 
         # compute gradient and do SGD step
         optimizer.zero_grad()
@@ -165,7 +165,7 @@ def validate(val_loader, model, criterion):
             loss_r = 0
             for p in model.parameters():
                 loss_r += torch.sum(p ** 2)
-            loss = loss + loss_r
+            loss = loss + args.weight_decay*loss_r
 
             # measure accuracy and record loss
             acc = accuracy(output.data, target)
