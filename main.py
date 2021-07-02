@@ -118,6 +118,11 @@ def train(train_loader, model, criterion, optimizer):
             output = output + args.logit_adjustments
         loss = criterion(output, target_var)
 
+        loss_r = 0
+        for p in model.parameters():
+            loss_r += torch.sum(p**2)
+        loss = loss + loss_r
+
         # compute gradient and do SGD step
         optimizer.zero_grad()
         loss.backward()
@@ -156,6 +161,11 @@ def validate(val_loader, model, criterion):
             elif args.logit_adj_train:
                 # loss term contain adjustment; no adjustment in logits
                 loss = criterion(output + args.logit_adjustments, target_var)
+
+            loss_r = 0
+            for p in model.parameters():
+                loss_r += torch.sum(p ** 2)
+            loss = loss + loss_r
 
             # measure accuracy and record loss
             acc = accuracy(output.data, target)
