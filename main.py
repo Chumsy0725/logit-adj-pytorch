@@ -162,11 +162,6 @@ def validate(val_loader, model, criterion):
                 # loss term contain adjustment; no adjustment in logits
                 loss = criterion(output + args.logit_adjustments, target_var)
 
-            loss_r = 0
-            for p in model.parameters():
-                loss_r += torch.sum(p ** 2)
-            loss = loss + args.weight_decay*loss_r
-
             # measure accuracy and record loss
             acc = accuracy(output.data, target)
             losses.update(loss.item(), inputs.size(0))
