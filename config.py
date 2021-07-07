@@ -5,14 +5,12 @@ def get_arguments():
     parser = argparse.ArgumentParser(
         description='PyTorch implementation of the paper: Long-tail Learning via Logit Adjustment'
     )
-
     parser.add_argument('--dataset', default="cifar10-lt", type=str, help='Dataset to use.',
                         choices=["cifar10", "cifar100", "cifar10-lt", "cifar100-lt"])
     parser.add_argument('--data_home', default="data", type=str,
                         help='Directory where data files are stored.')
     parser.add_argument('--num_workers', default=2, type=int, metavar='N',
                         help='number of workers at dataloader')
-
     parser.add_argument('--batch_size', default=128, type=int, help='mini-batch size (default: 128)')
     parser.add_argument('--lr', default=0.1, type=float, help='initial learning rate')
     parser.add_argument('--momentum', default=0.9, type=float, help='momentum')

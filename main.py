@@ -12,10 +12,8 @@ from pprint import pprint
 
 parser = get_arguments()
 args = parser.parse_args()
-
 device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 args.device = device
-
 exp_loc, model_loc = log_folders(args)
 writer = SummaryWriter(log_dir=exp_loc)
 
@@ -30,7 +28,6 @@ def main():
     model = torch.nn.DataParallel(resnet32(num_classes=num_class))
     model = model.to(device)
     cudnn.benchmark = True
-
     criterion = nn.CrossEntropyLoss().to(device)
 
     if args.logit_adj_post:
@@ -62,7 +59,6 @@ def main():
                                 nesterov=True)
     lr_scheduler = torch.optim.lr_scheduler.MultiStepLR(optimizer,
                                                         milestones=args.scheduler_steps)
-
 
     loop = tqdm(range(0, args.epochs), total=args.epochs, leave=False)
     val_loss, val_acc = 0, 0
@@ -120,8 +116,8 @@ def train(train_loader, model, criterion, optimizer):
 
         loss_r = 0
         for p in model.parameters():
-            loss_r += torch.sum(p**2)
-        loss = loss + args.weight_decay*loss_r
+            loss_r += torch.sum(p ** 2)
+        loss = loss + args.weight_decay * loss_r
 
         # compute gradient and do SGD step
         optimizer.zero_grad()
@@ -129,7 +125,6 @@ def train(train_loader, model, criterion, optimizer):
         optimizer.step()
 
         # measure accuracy and record loss
-
         losses.update(loss.item(), inputs.size(0))
         accuracies.update(acc, inputs.size(0))
 
