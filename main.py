@@ -3,8 +3,9 @@ import torch.nn.parallel
 import torch.backends.cudnn as cudnn
 import torch.optim
 import torch.utils.data
+import utils
+import os
 from model import resnet32
-from utils import *
 from config import get_arguments
 from torch.utils.tensorboard import SummaryWriter
 from tqdm import tqdm
@@ -14,16 +15,14 @@ parser = get_arguments()
 args = parser.parse_args()
 device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 args.device = device
-exp_loc, model_loc = log_folders(args)
+exp_loc, model_loc = utils.log_folders(args)
 writer = SummaryWriter(log_dir=exp_loc)
 
 
 def main():
-    global args
-    # cant do both at same time
-    assert (not (args.logit_adj_post and args.logit_adj_train))
 
-    train_loader, val_loader = get_loaders(args)
+    assert (not (args.logit_adj_post and args.logit_adj_train))
+    train_loader, val_loader = utils.get_loaders(args)
     num_class = len(args.class_names)
     model = torch.nn.DataParallel(resnet32(num_classes=num_class))
     model = model.to(device)
@@ -37,12 +36,12 @@ def main():
             model.load_state_dict(checkpoint['state_dict'])
             for tro in args.tro_post_range:
                 args.tro = tro
-                args.logit_adjustments = compute_adjustment(train_loader, tro, args)
+                args.logit_adjustments = utils.compute_adjustment(train_loader, tro, args)
                 val_loss, val_acc = validate(val_loader, model, criterion)
-                results = class_accuracy(val_loader, model, args)
+                results = utils.class_accuracy(val_loader, model, args)
                 results["OA"] = val_acc
                 pprint(results)
-                hyper_param = log_hyperparameter(args, tro)
+                hyper_param = utils.log_hyperparameter(args, tro)
                 writer.add_hparams(hparam_dict=hyper_param, metric_dict=results)
                 writer.close()
         else:
@@ -50,7 +49,7 @@ def main():
 
         return
 
-    args.logit_adjustments = compute_adjustment(train_loader, args.tro_train, args)
+    args.logit_adjustments = utils.compute_adjustment(train_loader, args.tro_train, args)
 
     optimizer = torch.optim.SGD(model.parameters(),
                                 args.lr,
@@ -84,9 +83,9 @@ def main():
     mdel_data = {"state_dict": model.state_dict()}
     torch.save(mdel_data, os.path.join(model_loc, file_name))
 
-    results = class_accuracy(val_loader, model, args)
+    results = utils.class_accuracy(val_loader, model, args)
     results["OA"] = val_acc
-    hyper_param = log_hyperparameter(args, args.tro_train)
+    hyper_param = utils.log_hyperparameter(args, args.tro_train)
     pprint(results)
     writer.add_hparams(hparam_dict=hyper_param, metric_dict=results)
     writer.close()
@@ -95,8 +94,8 @@ def main():
 def train(train_loader, model, criterion, optimizer):
     """ Run one train epoch """
 
-    losses = AverageMeter()
-    accuracies = AverageMeter()
+    losses = utils.AverageMeter()
+    accuracies = utils.AverageMeter()
 
     # switch to train mode
     model.train()
@@ -108,7 +107,7 @@ def train(train_loader, model, criterion, optimizer):
 
         # compute output
         output = model(input_var)
-        acc = accuracy(output.data, target)
+        acc = utils.accuracy(output.data, target)
 
         if args.logit_adj_train:
             output = output + args.logit_adjustments
@@ -134,8 +133,8 @@ def train(train_loader, model, criterion, optimizer):
 def validate(val_loader, model, criterion):
     """ Run evaluation """
 
-    losses = AverageMeter()
-    accuracies = AverageMeter()
+    losses = utils.AverageMeter()
+    accuracies = utils.AverageMeter()
 
     # switch to evaluate mode
     model.eval()
@@ -158,7 +157,7 @@ def validate(val_loader, model, criterion):
                 loss = criterion(output + args.logit_adjustments, target_var)
 
             # measure accuracy and record loss
-            acc = accuracy(output.data, target)
+            acc = utils.accuracy(output.data, target)
             losses.update(loss.item(), inputs.size(0))
             accuracies.update(acc, inputs.size(0))
 
