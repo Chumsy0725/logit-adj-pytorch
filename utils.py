@@ -1,16 +1,20 @@
-import torch
 import os
+import torch
 import numpy as np
 from torch.utils.data import DataLoader
 from dataset.utils import DATASET_MAPPINGS
 from dataset.transforms import TRAIN_TRANSFORMS, TEST_TRANSFORMS
 
 
-class AverageMeter(object):
+class AverageMeter:
     """Computes and stores the average and current value"""
 
     def __init__(self):
         self.reset()
+        self.val = 0
+        self.avg = 0
+        self.sum = 0
+        self.count = 0
 
     def reset(self):
         self.val = 0
@@ -37,6 +41,7 @@ def accuracy(outputs, labels):
 
 def class_accuracy(test_loader, model, args):
     """ Computes the accuracy for each class"""
+
     classes = args.class_names
     num_class = len(args.class_names)
     with torch.no_grad():
@@ -71,6 +76,8 @@ def class_accuracy(test_loader, model, args):
 
 
 def make_dir(log_dir):
+    """ Makes a directory """
+
     try:
         os.makedirs(log_dir)
     except FileExistsError:
@@ -78,6 +85,8 @@ def make_dir(log_dir):
 
 
 def log_hyperparameter(args, tro):
+    """Logs the hyperparameter values"""
+
     whole_dict = vars(args)
     hyperparam = {}
     keys = ['logit_adj_post', 'logit_adj_train']
@@ -88,8 +97,10 @@ def log_hyperparameter(args, tro):
 
 
 def log_folders(args):
+    """logs the folder"""
+
     log_dir = 'logs'
-    exp_dir = 'dataset:{}_adjtrain:{}'.format(
+    exp_dir = 'dataset_{}_adjtrain_{}'.format(
         args.dataset,
         args.logit_adj_train)
     exp_loc = os.path.join(log_dir, exp_dir)
@@ -101,8 +112,10 @@ def log_folders(args):
 
 
 def compute_adjustment(train_loader, tro, args):
+    """compute the base probabilities"""
+
     label_freq = {}
-    for i, (inputs, target) in enumerate(train_loader):
+    for _, (_, target) in enumerate(train_loader):
         target = target.to(args.device)
         for j in target:
             key = str(j.item())
@@ -117,6 +130,8 @@ def compute_adjustment(train_loader, tro, args):
 
 
 def get_loaders(args):
+    """loads the dataset"""
+
     dataset = DATASET_MAPPINGS[args.dataset]
     train_dataset = dataset(root=args.data_home,
                             train=True,

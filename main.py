@@ -1,15 +1,16 @@
+import os
+from pprint import pprint
+from tqdm import tqdm
 import torch.nn as nn
 import torch.nn.parallel
 import torch.backends.cudnn as cudnn
 import torch.optim
 import torch.utils.data
+from torch.utils.tensorboard import SummaryWriter
 import utils
-import os
 from model import resnet32
 from config import get_arguments
-from torch.utils.tensorboard import SummaryWriter
-from tqdm import tqdm
-from pprint import pprint
+
 
 parser = get_arguments()
 args = parser.parse_args()
@@ -20,8 +21,9 @@ writer = SummaryWriter(log_dir=exp_loc)
 
 
 def main():
+    """Main script"""
 
-    assert (not (args.logit_adj_post and args.logit_adj_train))
+    assert not (args.logit_adj_post and args.logit_adj_train)
     train_loader, val_loader = utils.get_loaders(args)
     num_class = len(args.class_names)
     model = torch.nn.DataParallel(resnet32(num_classes=num_class))
@@ -76,7 +78,8 @@ def main():
             writer.add_scalar("val/loss", val_loss, epoch)
 
         loop.set_description(f"Epoch [{epoch}/{args.epochs}")
-        loop.set_postfix(train_loss=f"{train_loss:.2f}", val_loss=f"{val_loss:.2f}", train_acc=f"{train_acc:.2f}",
+        loop.set_postfix(train_loss=f"{train_loss:.2f}", val_loss=f"{val_loss:.2f}",
+                         train_acc=f"{train_acc:.2f}",
                          val_acc=f"{val_acc:.2f}")
 
     file_name = 'model.th'
@@ -97,15 +100,13 @@ def train(train_loader, model, criterion, optimizer):
     losses = utils.AverageMeter()
     accuracies = utils.AverageMeter()
 
-    # switch to train mode
     model.train()
 
-    for i, (inputs, target) in enumerate(train_loader):
+    for _, (inputs, target) in enumerate(train_loader):
         target = target.to(device)
         input_var = inputs.to(device)
         target_var = target
 
-        # compute output
         output = model(input_var)
         acc = utils.accuracy(output.data, target)
 
@@ -114,16 +115,14 @@ def train(train_loader, model, criterion, optimizer):
         loss = criterion(output, target_var)
 
         loss_r = 0
-        for p in model.parameters():
-            loss_r += torch.sum(p ** 2)
+        for parameter in model.parameters():
+            loss_r += torch.sum(parameter ** 2)
         loss = loss + args.weight_decay * loss_r
 
-        # compute gradient and do SGD step
         optimizer.zero_grad()
         loss.backward()
         optimizer.step()
 
-        # measure accuracy and record loss
         losses.update(loss.item(), inputs.size(0))
         accuracies.update(acc, inputs.size(0))
 
@@ -136,16 +135,14 @@ def validate(val_loader, model, criterion):
     losses = utils.AverageMeter()
     accuracies = utils.AverageMeter()
 
-    # switch to evaluate mode
     model.eval()
 
     with torch.no_grad():
-        for i, (inputs, target) in enumerate(val_loader):
+        for _, (inputs, target) in enumerate(val_loader):
             target = target.to(device)
             input_var = inputs.to(device)
             target_var = target.to(device)
 
-            # compute output
             output = model(input_var)
             loss = criterion(output, target_var)
 
@@ -153,10 +150,8 @@ def validate(val_loader, model, criterion):
                 output = output - args.logit_adjustments
 
             elif args.logit_adj_train:
-                # loss term contain adjustment; no adjustment in logits
                 loss = criterion(output + args.logit_adjustments, target_var)
 
-            # measure accuracy and record loss
             acc = utils.accuracy(output.data, target)
             losses.update(loss.item(), inputs.size(0))
             accuracies.update(acc, inputs.size(0))

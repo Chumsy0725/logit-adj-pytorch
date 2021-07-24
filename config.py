@@ -2,9 +2,9 @@ import argparse
 
 
 def get_arguments():
+
     parser = argparse.ArgumentParser(
-        description='PyTorch implementation of the paper: Long-tail Learning via Logit Adjustment'
-    )
+        description='PyTorch implementation of the paper: Long-tail Learning via Logit Adjustment')
     parser.add_argument('--dataset', default="cifar10-lt", type=str, help='Dataset to use.',
                         choices=["cifar10", "cifar100", "cifar10-lt", "cifar100-lt"])
     parser.add_argument('--data_home', default="data", type=str,

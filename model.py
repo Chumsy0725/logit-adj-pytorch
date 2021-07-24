@@ -6,13 +6,13 @@ _BATCH_NORM_DECAY = 0.1
 _BATCH_NORM_EPSILON = 1e-5
 
 
-def BatchNorm2d(num_features):
+def batch_norm2d(num_features):
     return nn.BatchNorm2d(num_features, eps=_BATCH_NORM_EPSILON, momentum=_BATCH_NORM_DECAY)
 
 
-def _weights_init(m):
-    if isinstance(m, nn.Linear) or isinstance(m, nn.Conv2d):
-        init.kaiming_normal_(m.weight)
+def _weights_init(layer):
+    if isinstance(layer, nn.Linear) or isinstance(layer, nn.Conv2d):
+        init.kaiming_normal_(layer.weight)
 
 
 class IdentityBlock(nn.Module):
@@ -21,11 +21,11 @@ class IdentityBlock(nn.Module):
     def __init__(self, in_planes, planes):
         super().__init__()
         self.conv1 = nn.Conv2d(in_planes, planes, kernel_size=1, stride=1, padding=0, bias=False)
-        self.bn1 = BatchNorm2d(planes)
+        self.bn1 = batch_norm2d(planes)
         self.conv2 = nn.Conv2d(planes, planes, kernel_size=3, stride=1, padding=1, bias=False)
-        self.bn2 = BatchNorm2d(planes)
+        self.bn2 = batch_norm2d(planes)
         self.conv3 = nn.Conv2d(planes, planes, kernel_size=1, stride=1, padding=0, bias=False)
-        self.bn3 = BatchNorm2d(planes)
+        self.bn3 = batch_norm2d(planes)
         self.act = nn.ReLU()
 
     def forward(self, x):
@@ -43,13 +43,13 @@ class ConvBlock(nn.Module):
     def __init__(self, in_planes, planes, stride=2):
         super().__init__()
         self.conv1 = nn.Conv2d(in_planes, planes, kernel_size=1, stride=1, padding=0, bias=False)
-        self.bn1 = BatchNorm2d(planes)
+        self.bn1 = batch_norm2d(planes)
         self.conv2 = nn.Conv2d(planes, planes, kernel_size=3, stride=stride, padding=1, bias=False)
-        self.bn2 = BatchNorm2d(planes)
+        self.bn2 = batch_norm2d(planes)
         self.conv3 = nn.Conv2d(planes, planes, kernel_size=1, stride=1, padding=0, bias=False)
-        self.bn3 = BatchNorm2d(planes)
+        self.bn3 = batch_norm2d(planes)
         self.conv_shortcut = nn.Conv2d(in_planes, planes, kernel_size=1, stride=stride, padding=0, bias=False)
-        self.bn_shortcut = BatchNorm2d(planes)
+        self.bn_shortcut = batch_norm2d(planes)
         self.act = nn.ReLU()
 
     def forward(self, x):
@@ -68,7 +68,7 @@ class ResNet(nn.Module):
 
         self.padd = nn.ZeroPad2d(3)
         self.conv1 = nn.Conv2d(3, 16, kernel_size=3, stride=1, padding=0, bias=False)
-        self.bn1 = BatchNorm2d(16)
+        self.bn1 = batch_norm2d(16)
 
         unzip_info = list(zip(*config))
         num_layers = unzip_info[0]
@@ -77,7 +77,7 @@ class ResNet(nn.Module):
         self.layer1 = self._make_layer(num_layers[0], filters[0], strides[0])
         self.layer2 = self._make_layer(num_layers[1], filters[1], strides[1])
         self.layer3 = self._make_layer(num_layers[2], filters[2], strides[2])
-        self.bn2 = BatchNorm2d(self.in_planes)
+        self.bn2 = batch_norm2d(self.in_planes)
         self.linear = nn.Linear(filters[2], num_classes)
         self.act = nn.ReLU()
         self.apply(_weights_init)
