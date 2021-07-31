@@ -1,6 +1,6 @@
 # logit-adj-pytorch
 ## PyTorch implementation of the paper: Long-tail Learning via Logit Adjustment
-This code accompanies the paper:
+This code implement the paper:
 [Long-tail learning via logit adjustment](https://arxiv.org/abs/2007.07314) : Aditya Krishna Menon, Sadeep Jayasumana, Ankit Singh Rawat, Himanshu Jain, Andreas Veit, Sanjiv Kumar. ICLR 2021.
 
 ### Running the code
