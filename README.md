@@ -22,3 +22,10 @@ tensorboard --logdir logs
 
 Replace **cifar10-lt** above with **cifar100-lt** to obtain results for the CIFAR-100 long-tail dataset.
 
+### Results
+
+|   | Baseline | Post-Hoc logit adjustment | logit adjustment loss|
+| ------------- | ------------- | ------- | -------      |
+| CIFAR10LT  | 0.7127  |   0.7844 | 0.7896 |
+| CIFAR100LT | 39.58 | 0.4404 | 0.4402 |
+|----|----|-----|-----|
