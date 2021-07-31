@@ -28,4 +28,4 @@ Replace **cifar10-lt** above with **cifar100-lt** to obtain results for the CIFA
 | ------------- | ------------- | ------- | -------      |
 | CIFAR10LT  | 0.7127  |   0.7844 | 0.7896 |
 | CIFAR100LT | 39.58 | 0.4404 | 0.4402 |
-|----|----|-----|-----|
+|
