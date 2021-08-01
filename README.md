@@ -26,5 +26,5 @@ Replace **cifar10-lt** above with **cifar100-lt** to obtain results for the CIFA
 
 |   | Baseline | Post-Hoc logit adjustment | logit adjustment loss|
 | ------------- | ------------- | ------- | -------      |
-| CIFAR10LT  | 0.7127  |   0.7844 | 0.7896 |
+| CIFAR10LT  | 0.7127  |   0.7816 | 0.7857 |
 | CIFAR100LT | 0.3985 | 0.4404 | 0.4402 |
