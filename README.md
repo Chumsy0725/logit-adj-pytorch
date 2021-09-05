@@ -1,7 +1,7 @@
 # logit-adj-pytorch
 ## PyTorch implementation of the paper: Long-tail Learning via Logit Adjustment
-This code implement the paper:
-[Long-tail learning via logit adjustment](https://arxiv.org/abs/2007.07314) : Aditya Krishna Menon, Sadeep Jayasumana, Ankit Singh Rawat, Himanshu Jain, Andreas Veit, Sanjiv Kumar. ICLR 2021.
+This code implements the paper:
+[Long-tail Learning via Logit Adjustment](https://arxiv.org/abs/2007.07314) : Aditya Krishna Menon, Sadeep Jayasumana, Ankit Singh Rawat, Himanshu Jain, Andreas Veit, Sanjiv Kumar. ICLR 2021.
 
 ### Running the code
 ```python
@@ -24,7 +24,7 @@ Replace **cifar10-lt** above with **cifar100-lt** to obtain results for the CIFA
 
 ### Results
 
-|   | Baseline | Post-Hoc logit adjustment | logit adjustment loss|
+|   | Baseline | Post-hoc logit adjustment | Logit-adjusted loss|
 | ------------- | ------------- | ------- | -------      |
 | CIFAR10LT  | 0.7127  |   0.7816 | 0.7857 |
 | CIFAR100LT | 0.3985 | 0.4404 | 0.4402 |
