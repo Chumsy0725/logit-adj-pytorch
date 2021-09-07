@@ -115,10 +115,10 @@ def compute_adjustment(train_loader, tro, args):
     """compute the base probabilities"""
 
     label_freq = {}
-    for _, (_, target) in enumerate(train_loader):
+    for i, (inputs, target) in enumerate(train_loader):
         target = target.to(args.device)
         for j in target:
-            key = str(j.item())
+            key = int(j.item())
             label_freq[key] = label_freq.get(key, 0) + 1
     label_freq = dict(sorted(label_freq.items()))
     label_freq_array = np.array(list(label_freq.values()))
